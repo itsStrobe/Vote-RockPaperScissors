@@ -1,0 +1,28 @@
+{
+  "name": "vote-rockpaperscissors",
+  "version": "1.0.0",
+  "description": "Web game based on the Vote Rock-Paper-Scissors game from the anime series Kakegurui.",
+  "main": "server.js",
+  "scripts": {
+    "test": "nodemon server.js",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itsStrobe/Vote-RockPaperScissors.git"
+  },
+  "author": "Jose Zavala",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itsStrobe/Vote-RockPaperScissors/issues"
+  },
+  "homepage": "https://github.com/itsStrobe/Vote-RockPaperScissors#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.14",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.4",
+    "uuid": "^8.0.0"
+  }
+}
