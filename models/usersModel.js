@@ -8,6 +8,10 @@ const UserSchema = mongoose.Schema({
         required : true,
         unique : true
     },
+    password : {
+        type : String,
+        required : true
+    },
     date : {
         type : Date,
         default : Date.now()
@@ -24,6 +28,7 @@ const Users = {
                     return createdUser;
                 })
                 .catch( err => {
+                    console.log(err);
                     throw new Error( err );
                 });
     },
@@ -34,7 +39,7 @@ const Users = {
                     return allUsers;
                 })
                 .catch( err => {
-                    return err;
+                    throw new Error( err )
                 });
     },
     getByName : function(name){
@@ -44,7 +49,7 @@ const Users = {
                     return res;
                 })
                 .catch(err => {
-                    return err;
+                    throw new Error( err )
                 });
     },
     updateUser : function(name, fields){
@@ -58,8 +63,20 @@ const Users = {
                     return res;
                 })
                 .catch(err => {
-                    return err;
+                    throw new Error( err )
                 });
+    },
+    deleteUser : function(name){
+        return usersCollection
+            .findOneAndDelete(
+                {name : name}
+            )
+            .then(res => {
+                return res;
+            })
+            .catch(err => {
+                throw new Error( err )
+            });
     }
 }
 
