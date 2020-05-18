@@ -25,7 +25,6 @@ function validateSession() {
             displayServerResponse(`Welcome back ${responseJSON.name}`);
         })
         .catch(err => {
-            console.log(err);
             displayServerResponse(err.message);
             window.location.href = "/index.html";
         });   
