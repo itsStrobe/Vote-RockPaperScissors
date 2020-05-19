@@ -2,14 +2,72 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width">
+        <meta name="viewport" content="width=device-width"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <title>Vote - RPS</title>
         <link href="./../css/home.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
+        <header>
+            <h1>Vote - Rock Paper Scissors</h1>
+        </header>
+
+        <nav class="navbar">
+            <div class="hamburger">&#9776;</div>
+        </nav>
+
         <section class="response">
             
         </section>
+
+        <main>
+            <section class="game-section" id="active-games-section">
+                <h2>Public Games</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="tb_header">Game Owner</th>
+                            <th class="tb_header">Voters</th>
+                            <th class="tb_header">Join Now</th>
+                        </tr>
+                    </thead>
+                    <tbody class="active-games">
+                        <tr>
+                            <td class="tb_row">owner_ph</td>
+                            <td class="tb_row">voters_ph</td>
+                            <td class="tb_row">
+                                <button class="join-game" id="game-code">
+                                    Join
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </section>
+            <section class="game-section" id="play-games-section">
+                <div class="create-game-div">
+                    <button id="create-game-code">
+                        Create Game
+                    </button>
+                </div>
+                <div class="join-game-div">
+                    <input type="text" id="joinGameCode" value="[Game Code]" />
+                    <button id="join-game-code">
+                        Join Game
+                    </button>
+                </div>
+
+            </section>
+        </main>
+
+        <footer>
+            <ul class="social">
+                <li class="social_icon"><i class="fab fa-twitter"></i></li>
+                <li class="social_icon"><i class="fab fa-github"></i></li>
+                <li class="social_icon"><i class="fab fa-instagram"></i></li>
+            </ul>
+        </footer>
+
         <script src="./../js/home.js"></script>
     </body>
 </html>

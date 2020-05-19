@@ -203,6 +203,19 @@ app.get('/vote-rps/api/user/:userName/games', validateSessionToken, (req, res) =
         });
 });
 
+// Get Active Games
+app.get('/vote-rps/api/games/active', validateSessionToken, (req, res) => {
+    Games
+        .getActive()
+        .then(result => {
+            return res.status(200).json(result);
+        })
+        .catch(err => {
+            res.statusMessage = `Something went wrong when fetching active games. Err=${err.message}`;
+            return res.status(400).end();
+        })
+})
+
 // Get Game By Code
 app.get('/vote-rps/api/game/:gameCode', validateSessionToken, (req, res) => {
     const gameCode = req.params.gameCode;
@@ -221,7 +234,11 @@ app.get('/vote-rps/api/game/:gameCode', validateSessionToken, (req, res) => {
 // Create a New Game Owned By User
 app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req, res) => {
     const userName = req.user.name;
-    const { credits } = req.body;
+    let { credits } = req.body;
+
+    if(!credits){
+        credits = 120;
+    }
 
     // Get User
     Users

@@ -1,6 +1,7 @@
 const mongoose = require( 'mongoose' );
 const uuid = require("uuid");
 const Schema = mongoose.Schema;
+const { PASSWORD_MASK } = require( '../config' );
 
 const WinCondition = {
     FORFEIT : 0,
@@ -86,6 +87,21 @@ const Games = {
         return gamesCollection
                 .findOne({code : code})
                 .then(res => {
+                    return res;
+                })
+                .catch(err => {
+                    return err;
+                });
+    },
+    getActive : function(){
+        return gamesCollection
+                .find({status : Status.ONGOING})
+                .populate('owner')
+                .then(res => {
+                    res.forEach(game => {
+                        game.owner.password = PASSWORD_MASK
+                    });
+
                     return res;
                 })
                 .catch(err => {
