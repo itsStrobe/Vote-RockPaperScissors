@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { DATABASE_URL, PORT, SECRET_TOKEN, PASSWORD_MASK } = require( './config' );
 const { Users } = require('./models/usersModel');
-const { Games } = require('./models/gamesModel');
+const { Games, Status } = require('./models/gamesModel');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -40,9 +40,24 @@ app.get('/vote-rps/api/validate-session', validateSessionToken, (req, res) => {
 // USERS CRUD
 
 
-app.get('/vote-rps/api/users', (req, res) => {
+app.get('/vote-rps/api/users', jsonParser, (req, res) => {
+    const { names } = req.body;
+
+    if(!names){
+        Users
+            .getAll()
+            .then(allUsers => {
+                allUsers = MaskUsersPasswords(allUsers);
+                return res.status(200).json(allUsers);
+            })
+            .catch(err => {
+                res.statusMessage = "Something went wrong when retrieving Users.";
+                return res.status(400).end();
+            });
+    }
+
     Users
-        .getAll()
+        .getSeveralByName(names)
         .then(allUsers => {
             allUsers = MaskUsersPasswords(allUsers);
             return res.status(200).json(allUsers);
@@ -234,11 +249,6 @@ app.get('/vote-rps/api/game/:gameCode', validateSessionToken, (req, res) => {
 // Create a New Game Owned By User
 app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req, res) => {
     const userName = req.user.name;
-    let { credits } = req.body;
-
-    if(!credits){
-        credits = 120;
-    }
 
     // Get User
     Users
@@ -247,7 +257,6 @@ app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req,
             // Create Game for User
             Games
                 .createGame({
-                    credits: credits,
                     owner: user
                 })
                 .then(result => {
@@ -277,7 +286,7 @@ app.patch('/vote-rps/api/game/:gameCode', [jsonParser, validateSessionToken], (r
    
 });
 
-const server = app.listen( PORT, () =>{
+const server = app.listen(PORT, '0.0.0.0', () =>{
     console.log( `This server is running on port ${PORT}` );
 
     new Promise( ( resolve, reject ) => {
@@ -309,41 +318,242 @@ const Phase = {
     VOTING : 2,
     DRAWING : 3,
     RESOLUTION : 4,
-    WINNER : 5
+    FINISHED : 5
 };
 
 const Card = {
     ROCK : 0,
     PAPER : 1,
     SCISSORS : 2
-}
+};
 
+const Compare = {
+    0 : {
+        weakTo: 1,
+        strongTo: 2
+    }, // Rock
+    1 : {
+        weakTo: 2, 
+        strongTo: 0
+    }, // Paper
+    2: {
+        weakTo: 0,
+        strongTo: 1
+    } // Scissors
+};
+
+const INITIAL_CREDITS = 120;
 let games = new Object();
 let whois = new Object();
 const io = require('socket.io')(server);
 
+function captureGameSnapshot(gameCode, game){
+    /*
+    // Id
+    players : [{
+        type : Schema.Types.ObjectId,
+        ref : 'User'
+    }],
+    voters : [{
+        type : Schema.Types.ObjectId,
+        ref : 'User'
+    }],
+    winner : {
+        type : Schema.Types.ObjectId,
+        ref : 'User'
+    },
+    status : {
+        type : Number,
+        required : true,
+        default : Status.ONGOING
+    }
+    */
+    Users
+        .getSeveralByName(Object.keys(game.players))
+        .then(players => {
+            Users
+                .getSeveralByName(Object.keys(game.voters))
+                .then(voters => {
+                    Users
+                        .getByName(game.winner)
+                        .then(winner => {
+                            let status = Status.ONGOING;
+                            if(game.phase == Phase.FINISHED){
+                                status = Status.FINISHED;
+                            }
+
+                            Games
+                                .updateGame(gameCode, {
+                                    players,
+                                    voters,
+                                    winner,
+                                    status
+                                })
+                                .then(updatedGame => {
+                                    console.log(`Captured Snapshot of Game 'game=${gameCode}'`);
+                                })
+                                .catch(err => {
+                                    console.log(`Something went wrong when Capturing Snapshot of Game 'game=${gameCode}'.`);
+                                    throw new Error(`Something went wrong when Capturing Snapshot of Game 'game=${gameCode}'.`);
+                                });
+                        })
+                        .catch(err => {
+                            console.log(`Something went wrong when Retrieving User 'user=${game.winner}'.`);
+                            throw new Error(`Something went wrong when Retrieving User 'user=${game.winner}'.`);
+                        });
+                })
+                .catch(err => {
+                    console.log(`Something went wrong when Retrieving Users 'users=${game.players}'.`);
+                    throw new Error(`Something went wrong when Retrieving Users 'users=${game.players}'.`);
+                });
+        })
+        .catch(err => {
+            console.log(`Something went wrong when Retrieving Users 'user=${game.players}'.`);
+            throw new Error(`Something went wrong when Retrieving Users 'user=${game.players}'.`);
+        });
+}
+
 function getPlayersState(players){
-    let cleanPlayers = [ ];
+    let cleanPlayers = [{}, {}];
     
     Object.keys(players).forEach(player => {
-        cleanPlayers.push({
+        cleanPlayers[players[player].number - 1] = {
             number : players[player].number,
             name : players[player].name,
-            credits : players[player].credits
-        });
+            credits : players[player].credits,
+            selection : players[player].selection,
+            isReady : players[player].isReady
+        }
     });
 
     return cleanPlayers;
+}
+
+function getPlayersSelections(players){
+    let selections = [{}, {}];
+    
+    Object.keys(players).forEach(player => {
+        selections[players[player].number - 1] = {
+            number : players[player].number,
+            name : players[player].name,
+            selection : players[player].selection
+        }
+    });
+
+    return selections;
 }
 
 function getVotersState(voters){
     let cleanVoters = [ ];
     
     Object.keys(voters).forEach(voter => {
-        cleanVoters.push(voters[voter].name);
+        cleanVoters.push({
+            name : voters[voter].name,
+            voted : voters[voter].voted
+        });
     });
 
     return cleanVoters;
+}
+
+function arePlayersFinished(players){
+    let allSelected = true;
+    Object.keys(players).forEach(player => {
+        console.log(`${player} - Selection: ${players[player].selection}`);
+        if(players[player].selection == null){
+            allSelected = false;
+        }
+    });
+
+    return allSelected;
+}
+
+function areVotersFinished(voters){
+    let allVoted = true;
+    Object.keys(voters).forEach(voter => {
+        console.log(`${voter} voted? ${voters[voter].voted}`);
+        if(!voters[voter].voted){
+            allVoted = false;
+        }
+    });
+
+    console.log(`All Voted: ${allVoted}`);
+    return allVoted;
+}
+
+function fillDeck(card_deck){
+    let possibleCards = [Card.ROCK, Card.PAPER, Card.SCISSORS];
+
+    while(card_deck.length < 30){
+        card_deck.push(possibleCards[Math.floor(Math.random() * 3)]);
+    }
+
+    return card_deck;
+}
+
+function shuffleDeck(card_deck){
+    return card_deck.sort(() => Math.random() - 0.5);;
+}
+
+function drawPlayerCards(gameCode){
+    // Draw Player Cards
+    let card_it = 0;
+    Object.keys(games[gameCode].players).forEach(player => {
+        games[gameCode].players[player].hand = [];
+        for(let it = 0; it < 3; it++){
+            games[gameCode].players[player].hand.push(games[gameCode].card_deck[card_it]);
+            card_it++;
+        }
+        console.log(games[gameCode].players[player].hand);
+    });
+
+    // Provide Players of their Cards
+    Object.keys(games[gameCode].players).forEach(player => {
+        io.to(games[gameCode].players[player].socket.id).emit('provide-hand', {
+            user : {
+                hand : games[gameCode].players[player].hand
+            }
+        });
+    });
+}
+
+function evaluateDeck(gameCode){
+    allVoted = areVotersFinished(games[gameCode].voters);
+
+    if(allVoted){
+        // Change Phase of Game
+        games[gameCode].phase = Phase.DRAWING;
+
+        // Fill and Shuffle Decks
+        games[gameCode].card_deck = fillDeck(games[gameCode].card_deck);
+        games[gameCode].card_deck = shuffleDeck(games[gameCode].card_deck);
+
+        drawPlayerCards(gameCode);
+        Object.keys(games[gameCode].voters).forEach(voter => {
+            games[gameCode].voters[voter].voted = false;
+        });
+    }
+
+    /*
+        Update All Players
+    */
+    if(allVoted){
+        io.to(gameCode).emit('voters-finished-voting', {
+            user : {
+                waiting : false
+            },
+            gameState : {
+                phase : games[gameCode].phase
+            }
+        });
+    }
+    else{
+        io.to(gameCode).emit('voter-voted', {
+            gameState : {
+                voters : getVotersState(games[gameCode].voters)
+            }
+        })
+    }
 }
 
 async function getUserFromToken(token){
@@ -372,7 +582,9 @@ io.on('connection', (socket) => {
         }
     */
     socket.on('join-game', async (data) => {
+        console.log(`${socket.id} - join-game`);
         console.log(data);
+
         let user = null;
         let gameCode = data.gameCode;
         try {
@@ -381,6 +593,10 @@ io.on('connection', (socket) => {
         }
         catch{
             socket.error("Something went wrong when fetching your user.");
+        }
+
+        if(!user){
+            return;
         }
 
         // Add Socket to list of know users
@@ -392,11 +608,12 @@ io.on('connection', (socket) => {
         // If game does not exists, create it
         if(games[gameCode] == null){
             games[gameCode] = {
-                players : { }, // name : { #, name, credits, hand, socket }
+                players : { }, // name : { #, name, credits, hand, selection, isReady, socket }
                 voters : { }, // name : { name, voted, socket }
                 phase : Phase.LOBBY,
                 currentBet : 0,
-                card_deck : []
+                card_deck : [],
+                winner : null
             }
         }
 
@@ -408,7 +625,7 @@ io.on('connection', (socket) => {
             socket.to(gameCode).emit('user-joined', {
                 user : {
                     name : user.name,
-                    role : `Player ${games[gameCode].players[user.name].number}`
+                    role : `player${games[gameCode].players[user.name].number}`
                 },
                 gameState : {
                     players : getPlayersState(games[gameCode].players),
@@ -418,14 +635,15 @@ io.on('connection', (socket) => {
 
             socket.emit('welcome', {
                 player : {
-                    role : `Player ${games[gameCode].players[user.name].number}`,
+                    role : `player${games[gameCode].players[user.name].number}`,
                     hand : games[gameCode].players[user.name].hand
                 },
                 gameState : {
                     players : getPlayersState(games[gameCode].players), // { #, name, credits }
                     voters : getVotersState(games[gameCode].voters), // name
                     phase : games[gameCode].phase,
-                    currentBet : games[gameCode].currentBet
+                    currentBet : games[gameCode].currentBet,
+                    winner : games[gameCode].winner
                 }
             });
         }
@@ -434,15 +652,17 @@ io.on('connection', (socket) => {
             games[gameCode].players[user.name] = {
                 number : Object.keys(games[gameCode].players).length + 1,
                 name : user.name,
-                credits : 120, // Default amount
+                credits : INITIAL_CREDITS, // Default amount
                 hand : [],
+                selection : null,
+                isReady : false,
                 socket : socket
             };
 
             socket.to(gameCode).emit('user-joined', {
                 user : {
                     name : user.name,
-                    role : `Player ${games[gameCode].players[user.name].number}`
+                    role : `player${games[gameCode].players[user.name].number}`
                 },
                 gameState : {
                     players : getPlayersState(games[gameCode].players),
@@ -452,14 +672,15 @@ io.on('connection', (socket) => {
 
             socket.emit('welcome', {
                 player : {
-                    role : `Player ${games[gameCode].players[user.name].number}`,
+                    role : `player${games[gameCode].players[user.name].number}`,
                     hand : games[gameCode].players[user.name].hand
                 },
                 gameState : {
                     players : getPlayersState(games[gameCode].players), // { #, name, credits }
                     voters : getVotersState(games[gameCode].voters), // name
                     phase : games[gameCode].phase,
-                    currentBet : games[gameCode].currentBet
+                    currentBet : games[gameCode].currentBet,
+                    winner : games[gameCode].winner
                 }
             });
         }
@@ -470,7 +691,7 @@ io.on('connection', (socket) => {
             socket.to(gameCode).emit('user-joined', {
                 user : {
                     name : user.name,
-                    role : `Player ${games[gameCode].players[user.name].number}`
+                    role : `player${games[gameCode].players[user.name].number}`
                 },
                 gameState : {
                     players : getPlayersState(games[gameCode].players),
@@ -487,7 +708,8 @@ io.on('connection', (socket) => {
                     players : getPlayersState(games[gameCode].players), // { #, name, credits }
                     voters : getVotersState(games[gameCode].voters), // name
                     phase : games[gameCode].phase,
-                    currentBet : games[gameCode].currentBet
+                    currentBet : games[gameCode].currentBet,
+                    winner : games[gameCode].winner
                 }
             });
         }
@@ -502,7 +724,7 @@ io.on('connection', (socket) => {
             socket.to(gameCode).emit('user-joined', {
                 user : {
                     name : user.name,
-                    role : `Player ${games[gameCode].players[user.name].number}`
+                    role : 'Voter'
                 },
                 gameState : {
                     players : getPlayersState(games[gameCode].players),
@@ -519,7 +741,8 @@ io.on('connection', (socket) => {
                     players : getPlayersState(games[gameCode].players), // { #, name, credits }
                     voters : getVotersState(games[gameCode].voters), // name
                     phase : games[gameCode].phase,
-                    currentBet : games[gameCode].currentBet
+                    currentBet : games[gameCode].currentBet,
+                    winner : games[gameCode].winner
                 }
             });
         }
@@ -538,109 +761,440 @@ io.on('connection', (socket) => {
     /*
         Player - Ready
         {
-            sessiontoken
+            ...
         }
     */
-    socket.on('ready', async (data) => {
-        console.log(data);
-        let user = null;
-        try {
-            user = await getUserFromToken(data.sessiontoken);
-            console.log(user);
-        }
-        catch{
-            socket.error("Something went wrong when fetching your user.");
-        }
+    socket.on('ready', () => {
+        console.log(`${socket.id} - ready`);
+        console.log(whois[socketId]);
+
         /*
-            Event Logic
+            Validate Socket is part of a game
         */
+        if(!whois[socketId]){
+           socket.emit('not-joined');
+           return;
+        }
+
+        /*
+            Variable Declaration
+        */
+        const user = whois[socketId].user;
+        const gameCode = whois[socketId].gameCode;
+        let usersReady = true;
+        
+        /*
+            Validate User can partake in action.
+        */
+        if(!games[gameCode].players[user.name]){
+            return;
+        }
+        if(games[gameCode].phase != Phase.LOBBY && games[gameCode].phase != Phase.BETTING && games[gameCode].phase != Phase.RESOLUTION){
+            return;
+        }
+
+        /*
+            Game Logic
+        */
+        if(games[gameCode].players[user.name].isReady){
+            games[gameCode].players[user.name].isReady = false;
+        }
+        else{
+            games[gameCode].players[user.name].isReady = true;
+        }
+
+        if(Object.keys(games[gameCode].players).length < 2){
+            usersReady = false;
+        }
+        
+        Object.keys(games[gameCode].players).forEach(player => {
+            if(!games[gameCode].players[player].isReady) usersReady = false;
+        });
+
+
+        // RAGE-QUIT SCENARIO
+        if(games[gameCode].phase == Phase.RESOLUTION){
+            // If the Winner has all the Money, end the game
+            if(games[gameCode].players[games[gameCode].winner].credits >= (INITIAL_CREDITS*2)){
+                games[gameCode].phase = Phase.FINISHED;
+
+                // TODO: STORE GAME IN DB
+                captureGameSnapshot(gameCode, games[gameCode]);
+            }
+        }
+
+        if(usersReady){
+            if(games[gameCode].phase == Phase.LOBBY){
+                games[gameCode].phase = Phase.BETTING;
+            }
+            else if(games[gameCode].phase == Phase.BETTING){
+                games[gameCode].phase = Phase.VOTING;
+
+                // Evaluate if there are no Voters
+                evaluateDeck(gameCode);
+            }
+            else if(games[gameCode].phase == Phase.RESOLUTION){
+                // If Draw, pick again
+                if(games[gameCode].winner === "Draw"){
+                    let areThereMoreCards = false;
+                    Object.keys(games[gameCode].players).forEach(player => {
+                        games[gameCode].players[player].selection = null;
+                        games[gameCode].winner = null;
+                        if(games[gameCode].players[player].hand.length > 0){
+                            areThereMoreCards = true;
+                        }
+                    });
+
+                    if(areThereMoreCards){
+                        games[gameCode].phase = Phase.DRAWING;
+                    }
+                    else{
+                        games[gameCode].phase = Phase.BETTING;
+                    }
+                }
+                // If the Winner has all the Money, end the game
+                else if(games[gameCode].players[games[gameCode].winner].credits >= (INITIAL_CREDITS*2)){
+                    games[gameCode].phase = Phase.FINISHED;
+
+                    // TODO: STORE GAME IN DB
+                    captureGameSnapshot(gameCode, games[gameCode]);
+                }
+                // Continue the Game
+                else {
+                    games[gameCode].phase = Phase.BETTING;
+
+                    Object.keys(games[gameCode].players).forEach(player => {
+                        games[gameCode].players[player].hand = [];
+                        games[gameCode].players[player].selection = null;
+                        games[gameCode].card_deck = [];
+                        games[gameCode].winner = null;
+                    });
+                }
+            }
+
+            Object.keys(games[gameCode].players).forEach(player => {
+                games[gameCode].players[player].isReady = false;
+            });
+        }
+
+        console.log(games[gameCode]);
+
+        /*
+            Update All Players
+        */
+        io.in(gameCode).emit('player-ready', {
+            gameState : {
+                phase : games[gameCode].phase,
+                players : getPlayersState(games[gameCode].players),
+                winner : games[gameCode].winner
+            }
+        });
     });
 
     /*
         Player - Propose Bet
         {
-            credits : Number,
-            sessiontoken
+            credits : Number
         }
     */
-    socket.on('propose-bet', async (data) => {
+    socket.on('propose-bet', (data) => {
+        console.log(`${socket.id} - propose-bet`);
         console.log(data);
-        let user = null;
-        try {
-            user = await getUserFromToken(data.sessiontoken);
-            console.log(user);
-        }
-        catch{
-            socket.error("Something went wrong when fetching your user.");
-        }
+
         /*
-            Event Logic
+            Validate Socket is part of a game
         */
+        if(!whois[socketId]){
+           socket.emit('not-joined');
+           return;
+        }
+
+        /*
+            Variable Declaration
+        */
+        let bet = data.credits;
+        const user = whois[socketId].user;
+        const gameCode = whois[socketId].gameCode;
+        
+        /*
+            Validate User can partake in action.
+        */
+        if(!games[gameCode].players[user.name]){
+            return;
+        }
+        if(games[gameCode].phase != Phase.BETTING){
+            return;
+        }
+
+        /*
+            Game Logic
+        */
+        if(games[gameCode].players[user.name].credits < bet){
+            bet = games[gameCode].players[user.name].credits;
+        }
+        if(bet <= 0){
+            bet = 1;
+        }
+        games[gameCode].currentBet = Math.trunc(bet);
+
+        /*
+            Update All Players
+        */
+        io.in(gameCode).emit('bet-update', {
+            gameState : {
+                currentBet : games[gameCode].currentBet
+            }
+        });
     });
 
     /*
         Player - Retire
         {
-            sessiontoken
+            ...
         }
     */
-    socket.on('retire', async (data) => {
+    socket.on('retire', (data) => {
+        console.log(`${socket.id} - retire`);
         console.log(data);
-        let user = null;
-        try {
-            user = await getUserFromToken(data.sessiontoken);
-            console.log(user);
-        }
-        catch{
-            socket.error("Something went wrong when fetching your user.");
-        }
+
         /*
-            Event Logic
+            Validate Socket is part of a game
         */
+        if(!whois[socketId]){
+           socket.emit('not-joined');
+           return;
+        }
+
+        /*
+            Variable Declaration
+        */
+        const user = whois[socketId].user;
+        const gameCode = whois[socketId].gameCode;
+        
+        /*
+            Validate User can partake in action.
+        */
+        if(!games[gameCode].players[user.name]){
+            return;
+        }
+
+        /*
+            Game Logic
+        */
+        games[gameCode].phase = Phase.FINISHED;
+        Object.keys(games[gameCode].players).forEach(player => {
+            if(player != user.name){
+                games[gameCode].winner = player;
+            }
+        });
+
+        // TODO: STORE GAME IN DB
+        captureGameSnapshot(gameCode, games[gameCode]);
+
+        /*
+            Update All Players
+        */
+        io.to(gameCode).emit('player-ready', {
+            gameState : {
+                phase : games[gameCode].phase,
+                players : getPlayersState(games[gameCode].players),
+                winner : games[gameCode].winner
+            }
+        });
     });
 
     /*
         Player - Pick Card
         {
-            card : Card
-            sessiontoken
+            cardIdx : Index of Card in Hand
         }
     */
-    socket.on('pick-card', async (data) => {
+    socket.on('pick-card', (data) => {
+        console.log(`${socket.id} - pick-card`);
         console.log(data);
-        let user = null;
-        try {
-            user = await getUserFromToken(data.sessiontoken);
-            console.log(user);
-        }
-        catch{
-            socket.error("Something went wrong when fetching your user.");
-        }
+
         /*
-            Event Logic
+            Validate Socket is part of a game
         */
+        if(!whois[socketId]){
+           socket.emit('not-joined');
+           return;
+        }
+
+        /*
+            Variable Declaration
+        */
+        const user = whois[socketId].user;
+        const gameCode = whois[socketId].gameCode;
+        const cardIdx = data.cardIdx;
+        
+        let players = Object.keys(games[gameCode].players);
+        let finishedSelecting = false;
+        
+        /*
+            Validate User can partake in action.
+        */
+       console.log(`Condition 1: ${games[gameCode].players[user.name].name}`);
+       console.log(`Condition 2: ${games[gameCode].players[user.name].selection}`);
+       console.log(`Condition 3: ${games[gameCode].phase}`);
+        if(!games[gameCode].players[user.name]){
+            return;
+        }
+        if(games[gameCode].players[user.name].selection != null){
+            return;
+        }
+        if(cardIdx > games[gameCode].players[user.name].hand.length || cardIdx < 0){
+            return;
+        }
+        if(games[gameCode].phase != Phase.DRAWING){
+            return;
+        }
+
+        /*
+            Game Logic
+        */
+        console.log(`My Hand: ${games[gameCode].players[user.name].hand}`);
+        games[gameCode].players[user.name].selection = games[gameCode].players[user.name].hand[cardIdx];
+        games[gameCode].players[user.name].hand.splice(cardIdx, 1);
+
+        finishedSelecting = arePlayersFinished(games[gameCode].players);
+
+        /*
+            Update Game State
+        */
+        console.log(`finishedSelecting: ${finishedSelecting}`);
+        if(finishedSelecting){
+            games[gameCode].phase = Phase.RESOLUTION;
+
+            if (Compare[games[gameCode].players[players[0]].selection].strongTo === games[gameCode].players[players[1]].selection) {
+                games[gameCode].winner = players[0];
+
+                games[gameCode].players[players[0]].credits += games[gameCode].currentBet;
+                games[gameCode].players[players[1]].credits -= games[gameCode].currentBet;
+            }
+            else if (Compare[games[gameCode].players[players[0]].selection].weakTo === games[gameCode].players[players[1]].selection) {
+                games[gameCode].winner = players[1];
+
+                games[gameCode].players[players[1]].credits += games[gameCode].currentBet;
+                games[gameCode].players[players[0]].credits -= games[gameCode].currentBet;
+            }
+            else {
+                games[gameCode].winner = 'Draw';
+            }
+
+
+            console.log(`Winner: ${games[gameCode].winner}`);
+        }
+
+        /*
+            Update All Players
+        */
+        
+        socket.to(gameCode).emit('player-picked-card', {
+            gameState : {
+                players : getPlayersState(games[gameCode].players)
+            }
+        });
+
+        io.to(socketId).emit('player-picked-card', {
+            user : {
+                hand : games[gameCode].players[user.name].hand,
+                waiting : true
+            },
+            gameState : {
+                players : getPlayersState(games[gameCode].players)
+            }
+        })
+
+        if(finishedSelecting){
+            io.to(gameCode).emit('players-finished-picking', {
+                user : {
+                    waiting : false
+                },
+                gameState : {
+                    players : getPlayersState(games[gameCode].players),
+                    phase : games[gameCode].phase,
+                    winner : games[gameCode].winner
+                },
+                playersSelections : getPlayersSelections(games[gameCode].players)
+            });
+        }
+
+        console.log(games[gameCode]);
     });
 
     /*
         Voter - vote
         {
-            card : Card
-            sessiontoken
+            cardIdx : Index of Card in Hand
         }
     */
-    socket.on('vote', async (data) => {
+    socket.on('vote', (data) => {
+        console.log(`${socket.id} - vote`);
         console.log(data);
-        let user = null;
-        try {
-            user = await getUserFromToken(data.sessiontoken);
-            console.log(user);
-        }
-        catch{
-            socket.error("Something went wrong when fetching your user.");
-        }
+
         /*
-            Event Logic
+            Validate Socket is part of a game
         */
+        if(!whois[socketId]){
+           socket.emit('not-joined');
+           return;
+        }
+
+        /*
+            Variable Declaration
+        */
+        const user = whois[socketId].user;
+        const gameCode = whois[socketId].gameCode;
+        const cardIdx = data.cardIdx;
+
+        let allVoted = false;
+        
+        /*
+            Validate User can partake in action.
+        */
+        if(!games[gameCode].voters[user.name]){
+            return;
+        }
+        if(games[gameCode].voters[user.name].voted){
+            return;
+        }
+        if(cardIdx > 3 || cardIdx < 0){
+            return;
+        }
+        if(games[gameCode].phase != Phase.VOTING){
+            return;
+        }
+
+        /*
+            Game Logic
+        */
+        switch(cardIdx){
+            case 0:
+                games[gameCode].card_deck.push(Card.ROCK);
+                break;
+
+            case 1:
+                games[gameCode].card_deck.push(Card.PAPER);
+                break;
+            
+            case 2:
+                games[gameCode].card_deck.push(Card.SCISSORS);
+                break;
+        }
+
+        games[gameCode].voters[user.name].voted = true;
+        
+        evaluateDeck(gameCode);
+
+        io.to(socketId).emit('voter-voted', {
+            user : {
+                waiting : true
+            },
+            gameState : {
+                voters : getVotersState(games[gameCode].voters)
+            }
+        });
     });
 
     /*
@@ -654,19 +1208,22 @@ io.on('connection', (socket) => {
         let dc_user = whois[socketId].user;
         let dc_gameCode = whois[socketId].gameCode;
 
+        console.log(`DISCONNECTED - ${whois[socketId]}`);
+
         // Handle Player Disconnect
         if(games[dc_gameCode].players[dc_user.name] != null){
             /*
-                TODO
-                Continue Game or Declare Winner?
+                Continue Game - Server will wait for user reconnection
             */
         }
 
         // Handle Voter Disconnect
         if(games[dc_gameCode].voters[dc_user.name] != null){
-            // TODO: Verify Game is not waiting on user vote.
-
             delete games[dc_gameCode].voters[dc_user.name];
+            
+            if(games[dc_gameCode].phase === Phase.VOTING){
+                evaluateDeck(dc_gameCode);
+            }
         }
         
         io.to(dc_gameCode).emit('user-left', {

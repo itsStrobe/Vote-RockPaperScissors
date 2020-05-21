@@ -3,11 +3,6 @@ const uuid = require("uuid");
 const Schema = mongoose.Schema;
 const { PASSWORD_MASK } = require( '../config' );
 
-const WinCondition = {
-    FORFEIT : 0,
-    NO_CREDITS : 1
-}
-
 const Status = {
     ONGOING : 0,
     FINISHED : 1
@@ -20,11 +15,6 @@ const GameSchema = mongoose.Schema({
         required : true,
         default : uuid.v4(),
         unique : true
-    },
-    credits : {
-        type : Number,
-        required : true,
-        default : 120
     },
     owner : {
         type : Schema.Types.ObjectId,
@@ -47,11 +37,6 @@ const GameSchema = mongoose.Schema({
         type : Number,
         required : true,
         default : Status.ONGOING
-    },
-    winCondition : {
-        type : Number,
-        required : true,
-        default : WinCondition.FORFEIT
     },
     date : {
         type : Date,
@@ -111,7 +96,11 @@ const Games = {
     getOwnedBy : function(owner){
         return gamesCollection
                 .find({owner : owner})
-                .populate('owner')
+                .populate('owner', 'name')
+                .populate('voter', 'name')
+                .populate('players', 'name')
+                .populate('voters', 'name')
+                .populate('winner', 'name')
                 .then( userGames => {
                     return userGames;
                 })
@@ -132,7 +121,49 @@ const Games = {
                 .catch(err => {
                     return err;
                 });
+    },
+    getByVoter : function(voter){
+        return gamesCollection
+                .find({
+                    voters : voter
+                })
+                .populate('owner', 'name')
+                .populate('voter', 'name')
+                .then( userGames => {
+                    return userGames;
+                })
+                .catch(err => {
+                    return err;
+                });
+    },
+    getByPlayer : function(player){
+        return gamesCollection
+                .find({
+                    players : player
+                })
+                .populate('owner', 'name')
+                .populate('voter', 'name')
+                .then( userGames => {
+                    return userGames;
+                })
+                .catch(err => {
+                    return err;
+                });
+    },
+    getByWinner : function(winner){
+        return gamesCollection
+                .findOne({
+                    winner : player
+                })
+                .populate('owner', 'name')
+                .populate('voter', 'name')
+                .then( userGames => {
+                    return userGames;
+                })
+                .catch(err => {
+                    return err;
+                });
     }
 }
 
-module.exports = { Games, WinCondition, Status };
+module.exports = { Games, Status };

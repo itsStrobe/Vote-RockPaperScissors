@@ -52,6 +52,18 @@ const Users = {
                     throw new Error( err )
                 });
     },
+    getSeveralByName : function(names){
+        return usersCollection
+                .find({name : {
+                    $in: names
+                }})
+                .then(res => {
+                    return res;
+                })
+                .catch(err => {
+                    throw new Error( err )
+                });
+    },
     updateUser : function(name, fields){
         return usersCollection  
                 .findOneAndUpdate(

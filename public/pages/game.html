@@ -8,35 +8,206 @@
     </head>
     <body>
         <header>
-            <h1>Vote - Rock Paper Scissors</h1>
+            <h1>Game Code</h1>
+            <h2 id="game-gameCode">XXX-XXX</h2>
         </header>
-
-        <nav class="navbar">
-            <div class="hamburger">&#9776;</div>
-        </nav>
-
         <section class="response">
             
         </section>
 
         <main>
             <section class="game-section" id="lobby">
-
+                <div class="game-section-head" id="game-section-head-lobby">
+                    <h1 class="game-section-head-title">
+                        Game Lobby
+                    </h1>
+                </div>
+                <div class="game-section-players" id="game-section-players-lobby">
+                    <section class="game-section-players-player" id="game-section-players-player1-lobby">
+                        <h3 class="game-section-players-name" id="game-section-players-name-player1-lobby">
+                            PLAYER 1
+                        </h3>
+                        <button type="submit" class="player-ready" id="player1-ready-lobby">
+                            READY
+                        </button>
+                    </section>
+                    <section class="game-section-data" id="game-section-data-lobby">
+                        <h2 class="game-section-credits-header">
+                            CREDITS
+                        </h2>
+                        <h3 class="game-section-credits" id="game-section-credits-lobby">
+                            120
+                        </h3>
+                    </section>
+                    <section class="game-section-players-player" id="game-section-players-player2-lobby">
+                        <h3 class="game-section-players-name" id="game-section-players-name-player2-lobby">
+                            PLAYER 2
+                        </h3>
+                        <button type="submit" class="player-ready" id="player2-ready-lobby">
+                            READY
+                        </button>
+                    </section>
+                </div>
+                <div class="game-section-voters">
+                    <h2 class="game-section-voters-header">
+                        VOTERS
+                    </h2>
+                    <div class="game-section-voters-list" id="game-section-voters-list-lobby">
+                        voter1, voter2, voter3, ...
+                    </div>
+                </div>
             </section>
-            <section class="game-phase" id="betting">
+            <section class="game-section" id="betting">
+                <div class="game-section-head" id="game-section-head-betting">
+                    MAKE YOUR BETS
+                </div>
+                <div class="game-section-players" id="game-section-players-betting">
+                    <section class="game-section-players-player" id="game-section-players-player1-betting">
+                        <h3 class="game-section-players-name" id="game-section-players-name-player1-betting">
+                            PLAYER 1
+                        </h3>
+                        <h4 class="game-section-players-credits" id="game-section-players-credits-player1-betting">
+                            CREDITS: ###
+                        </h4>
+                        <button type="submit" class="player-ready" id="player1-ready-betting">
+                            READY
+                        </button>
+                        <button type="submit" class="player-ready" id="player1-retire-betting">
+                            RETIRE
+                        </button>
+                    </section>
+                    <section class="game-section-data" id="game-section-data-betting">
+                        <h2 class="game-section-currentBet-header">
+                            CURRENT BET
+                        </h2>
+                        <h3 class="game-section-currentBet" id="game-section-currentBet-betting">
+                            120
+                        </h3>
+                        <form class="user-form" id="make-bet">
 
+                            <section class="form-field">
+                                <input type="number" id="player-bet" />
+                            </section>
+
+                            <section class="form-buttons">
+                                <button type="submit" id="make-bet-button">
+                                    PROPOSE
+                                </button>
+                            </section>
+
+                        </form>
+                    </section>
+                    <section class="game-section-players-player" id="game-section-players-player2-betting">
+                        <h3 class="game-section-players-name" id="game-section-players-name-player2-betting">
+                            PLAYER 2
+                        </h3>
+                        <h4 class="game-section-players-credits" id="game-section-players-credits-player2-betting">
+                            CREDITS: ###
+                        </h4>
+                        <button type="submit" class="player-ready" id="player2-ready-betting">
+                            READY
+                        </button>
+                        <button type="submit" class="player-ready" id="player2-retire-betting">
+                            RETIRE
+                        </button>
+                    </section>
+                </div>
+                <div class="game-section-voters">
+                    <h2 class="game-section-voters-header">
+                        VOTERS
+                    </h2>
+                    <div class="game-section-voters-list" id="game-section-voters-list-betting">
+                        voter1, voter2, voter3, ...
+                    </div>
+                </div>
             </section>
-            <section class="game-phase" id="selection">
-
+            <section class="game-section" id="selection">
+                <div class="game-section-head" id="game-section-head-selection">
+                    MAKE A SELECTION
+                </div>
+                <div class="game-section-cards" id="game-section-cards-selection">
+                    <!-- PLACEHOLDER -->
+                    <section class="card" id="card-1">
+                        CARD 1
+                    </section>
+                    <!-- PLACEHOLDER -->
+                    <section class="card" id="card-2">
+                        CARD 2
+                    </section>
+                    <!-- PLACEHOLDER -->
+                    <section class="card" id="card-3">
+                        CARD 3
+                    </section>
+                </div>
             </section>
-            <section class="game-phase" id="standBy">
-
+            <section class="game-section" id="standBy">
+                <div class="game-section-head" id="game-section-head-standBy">
+                    WAITING FOR
+                </div>
+                <div class="game-section-waitingFor" id="game-section-waitingFor-standBy">
+                    user1, user2, user3, ...
+                </div>
             </section>
-            <section class="game-phase" id="resolution">
-
+            <section class="game-section" id="resolution">
+                <div class="game-section-head" id="game-section-head-resolution">
+                    SHOW YOUR HANDS!
+                </div>
+                <div class="game-section-players" id="game-section-players-resolution">
+                    <section class="game-section-players-player" id="game-section-players-player1-resolution">
+                        <h3 class="game-section-players-name" id="game-section-players-name-player1-resolution">
+                            PLAYER 1
+                        </h3>
+                        <h4 class="game-section-players-credits" id="game-section-players-credits-player1-resolution">
+                            CREDITS: ###
+                        </h4>
+                        <div class="card" id="player1-selection-resolution">
+                            SELECTION
+                        </div>
+                        <button type="submit" class="player-ready" id="player1-ready-resolution">
+                            READY
+                        </button>
+                    </section>
+                    <section class="game-section-data" id="game-section-data-resolution">
+                        <h2 class="game-section-winner-header">
+                            WINNER
+                        </h2>
+                        <h3 class="game-section-winner" id="game-section-winner-resolution">
+                            PLAYER
+                        </h3>
+                    </section>
+                    <section class="game-section-players-player" id="game-section-players-player2-resolution">
+                        <h3 class="game-section-players-name" id="game-section-players-name-player2-resolution">
+                            PLAYER 2
+                        </h3>
+                        <h4 class="game-section-players-credits" id="game-section-players-credits-player2-resolution">
+                            CREDITS: ###
+                        </h4>
+                        <div class="card" id="player2-selection-resolution">
+                            SELECTION
+                        </div>
+                        <button type="submit" class="player-ready" id="player2-ready-resolution">
+                            READY
+                        </button>
+                    </section>
+                </div>
+                <div class="game-section-voters">
+                    <h2 class="game-section-voters-header">
+                        VOTERS
+                    </h2>
+                    <div class="game-section-voters-list" id="game-section-voters-list-resolution">
+                        voter1, voter2, voter3, ...
+                    </div>
+                </div>
             </section>
-            <section class="game-phase" id="winner">
-
+            <section class="game-section" id="winner">
+                <section class="game-section-data" id="game-section-data-winner">
+                    <h2 class="game-section-winner-header">
+                        WINNER
+                    </h2>
+                    <h3 class="game-section-winner" id="game-section-winner-winner">
+                        PLAYER
+                    </h3>
+                </section>
             </section>
         </main>
 
