@@ -261,14 +261,17 @@ app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req,
                     owner: user
                 })
                 .then(result => {
+                    console.log(`Created New Game - 'code=${result.code}'`);
                     return res.status(201).json(result);
                 })
                 .catch(err => {
+                    console.log(err);
                     res.statusMessage = `Something went wrong when creating new game for Owner 'name=${userName}'.`;
                     return res.status(400).end();
                 });
         })
         .catch(err => {
+            console.log(err);
             res.statusMessage = `Something went wrong when fetching User 'name=${userName}'.`;
             return res.status(400).end();
         });
@@ -396,7 +399,7 @@ async function isGameActive(gameCode){
             return false;
         })
         .catch(err => {
-            console.err(err.message);
+            console.error(err.message);
             return false;
         })
 }
