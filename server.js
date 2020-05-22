@@ -261,6 +261,7 @@ app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req,
                     owner: user
                 })
                 .then(result => {
+                    console.log(result);
                     console.log(`Created New Game - 'code=${result.code}'`);
                     return res.status(201).json(result);
                 })
