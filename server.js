@@ -287,7 +287,7 @@ app.patch('/vote-rps/api/game/:gameCode', [jsonParser, validateSessionToken], (r
    
 });
 
-const server = app.listen(PORT, '127.0.0.1', () =>{
+const server = app.listen(PORT, '0.0.0.0', () =>{
     console.log( `This server is running on port ${PORT}` );
 
     new Promise( ( resolve, reject ) => {
