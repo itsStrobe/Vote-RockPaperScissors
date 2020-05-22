@@ -445,9 +445,16 @@ io.on('connection', (socket) => {
         }
 
         // Validate Game Exists and is Ongoing
-        if(!(await isGameActive(gameCode))){
+        try {
+            if(!(await isGameActive(gameCode))){
+                socket.emit('game-inactive', {});
+                socket.disconnect();
+                return;
+            }
+        }
+        catch(err){
+            console.error(err);
             socket.emit('game-inactive', {});
-            socket.disconnect();
             return;
         }
 
@@ -968,7 +975,7 @@ io.on('connection', (socket) => {
         let dc_user = whois[socketId].user;
         let dc_gameCode = whois[socketId].gameCode;
 
-        console.log(`DISCONNECTED - ${whois[socketId]}`);
+        console.log(`DISCONNECTED - ${whois[socketId].user.name}`);
 
         // Handle Player Disconnect
         if(games[dc_gameCode].players[dc_user.name] != null){
