@@ -14,6 +14,12 @@ const Card = {
     SCISSORS : 2
 };
 
+const CardImg = {
+    0 : "../img/rock_hand.png",
+    1 : "../img/paper_hand.png",
+    2 : "../img/scissors_hand.png"
+};
+
 const IntToCard = {
     0 : 'ROCK',
     1 : 'PAPER',
@@ -44,6 +50,11 @@ let gameState = {
     currentBet : 0,
     winner : null
 };
+
+let latestSelections = [
+    {}, // Player 1 - Selection
+    {}  // Player 2 - Selection
+]
 
 function validateSession() {
     let url = '/vote-rps/api/validate-session';
@@ -310,9 +321,7 @@ function updateSelection(){
     let it = 0;
     me.hand.forEach(card => {
         displayCards.innerHTML += `
-        <section class="card" id="card-${it}">
-            <h1>${IntToCard[card]}</h1>
-        </section>
+        <img class="card-img" class="card" id="card-${it}" src="${CardImg[card]}" alt="${IntToCard[card]}"/>
         `
         it++;
     });
@@ -341,7 +350,7 @@ function updateStandBy(){
     }
 }
 
-function updateResolution(params){
+function updateResolution(){
     /*
         DISPLAY RELEVANT INFO
     */
@@ -374,8 +383,8 @@ function updateResolution(params){
         }
 
         playerElem = document.getElementById(`player${it + 1}-selection-resolution`);
-        if(params[it].selection != undefined){
-            playerElem.innerHTML = IntToCard[params[it].selection];
+        if(latestSelections[it].selection != undefined){
+            playerElem.innerHTML = IntToCard[latestSelections[it].selection];
         }
         else{
             playerElem.innerHTML = 'SELECTION';
@@ -401,11 +410,10 @@ function updateWinner(){
     winner.innerHTML = gameState.winner;
 }
 
-function updateScreen(params){
+function updateScreen(){
     console.log("Update Screen");
     console.log(me);
     console.log(gameState);
-    console.log(params);
 
     // LOBBY PHASE
     if(gameState.phase === Phase.LOBBY){
@@ -468,7 +476,7 @@ function updateScreen(params){
         */
         changeActiveScreen(GameScreen.RESOLUTION);
 
-        updateResolution(params);
+        updateResolution();
     }
 
     // WINNER PHASE
@@ -488,11 +496,13 @@ function playGame(socket){
 
         me = data.player;
         gameState = data.gameState;
+        latestSelections = data.playersSelections;
 
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('user-joined', (data) => {
+        console.log('user-joined');
         console.log(data);
 
         /*
@@ -504,7 +514,7 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('bet-update', (data) => {
@@ -518,7 +528,7 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('player-ready', (data) => {
@@ -534,7 +544,7 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('provide-hand', (data) => {
@@ -548,7 +558,7 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('player-picked-card', (data) => {
@@ -572,7 +582,7 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('players-finished-picking', (data) => {
@@ -586,12 +596,12 @@ function playGame(socket){
         gameState.phase = data.gameState.phase;
         gameState.winner = data.gameState.winner;
 
-        let playersSelections = data.playersSelections;
+        latestSelections = data.playersSelections;
 
         /*
             Make UI Changes
         */
-        updateScreen(playersSelections);
+        updateScreen();
     });
 
     socket.on('voter-voted', (data) => {
@@ -611,7 +621,7 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
     });
 
     socket.on('voters-finished-voting', (data) => {
@@ -627,7 +637,22 @@ function playGame(socket){
         /*
             Make UI Changes
         */
-        updateScreen(null);
+        updateScreen();
+    });
+
+    socket.on('user-left', (data) => {
+        console.log(data);
+
+        /*
+            Update Game State
+        */
+        gameState.players = data.gameState.players;
+        gameState.voters = data.gameState.voters;
+
+        /*
+            Make UI Changes
+        */
+        updateScreen();
     });
 
     socket.on('not-joined', () => {
