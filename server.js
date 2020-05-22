@@ -6,6 +6,7 @@ const morgan = require( 'morgan' );
 const bodyParser = require( 'body-parser' );
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const uuid = require("uuid");
 const { DATABASE_URL, PORT, SECRET_TOKEN, PASSWORD_MASK } = require( './config' );
 const { Users } = require('./models/usersModel');
 const { Games, Status } = require('./models/gamesModel');
@@ -258,10 +259,10 @@ app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req,
             // Create Game for User
             Games
                 .createGame({
+                    code : uuid.v4(),
                     owner: user
                 })
                 .then(result => {
-                    console.log(result);
                     console.log(`Created New Game - 'code=${result.code}'`);
                     return res.status(201).json(result);
                 })

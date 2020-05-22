@@ -27,7 +27,7 @@ const Users = {
                     return createdUser;
                 })
                 .catch( err => {
-                    console.log(err);
+                    console.error(err);
                     throw new Error( err );
                 });
     },
@@ -38,7 +38,8 @@ const Users = {
                     return allUsers;
                 })
                 .catch( err => {
-                    throw new Error( err )
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getByName : function(name){
@@ -48,7 +49,8 @@ const Users = {
                     return res;
                 })
                 .catch(err => {
-                    throw new Error( err )
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getSeveralByName : function(names){
@@ -60,7 +62,8 @@ const Users = {
                     return res;
                 })
                 .catch(err => {
-                    throw new Error( err )
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     updateUser : function(name, fields){
@@ -74,7 +77,8 @@ const Users = {
                     return res;
                 })
                 .catch(err => {
-                    throw new Error( err )
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     deleteUser : function(name){
@@ -86,7 +90,8 @@ const Users = {
                 return res;
             })
             .catch(err => {
-                throw new Error( err )
+                console.error(err);
+                throw new Error( err );
             });
     }
 }

@@ -55,7 +55,8 @@ const Games = {
                     return createdGame;
                 })
                 .catch( err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getAll : function(){
@@ -65,7 +66,8 @@ const Games = {
                     return allGames;
                 })
                 .catch( err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getByCode : function(code){
@@ -75,7 +77,8 @@ const Games = {
                     return res;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getActive : function(){
@@ -90,7 +93,8 @@ const Games = {
                     return res;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getOwnedBy : function(owner){
@@ -105,7 +109,8 @@ const Games = {
                     return userGames;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     updateGame : function(code, fields){
@@ -119,7 +124,8 @@ const Games = {
                     return res;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getByVoter : function(voter){
@@ -133,7 +139,8 @@ const Games = {
                     return userGames;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getByPlayer : function(player){
@@ -147,7 +154,8 @@ const Games = {
                     return userGames;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     },
     getByWinner : function(winner){
@@ -161,7 +169,8 @@ const Games = {
                     return userGames;
                 })
                 .catch(err => {
-                    return err;
+                    console.error(err);
+                    throw new Error( err );
                 });
     }
 }
