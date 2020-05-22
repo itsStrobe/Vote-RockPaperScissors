@@ -287,7 +287,7 @@ app.patch('/vote-rps/api/game/:gameCode', [jsonParser, validateSessionToken], (r
    
 });
 
-const server = app.listen(PORT, '0.0.0.0', () =>{
+const server = app.listen(PORT, '127.0.0.1', () =>{
     console.log( `This server is running on port ${PORT}` );
 
     new Promise( ( resolve, reject ) => {
@@ -385,8 +385,8 @@ function captureGameSnapshot(game){
         });
 }
 
-function isGameActive(gameCode){
-    Games
+async function isGameActive(gameCode){
+    return await Games
         .getByCode(gameCode)
         .then(resp => {
             if(resp.status == Status.ONGOING){
@@ -445,7 +445,7 @@ io.on('connection', (socket) => {
         }
 
         // Validate Game Exists and is Ongoing
-        if(!isGameActive(gameCode)){
+        if(!(await isGameActive(gameCode))){
             socket.emit('game-inactive', {});
             socket.disconnect();
             return;
@@ -587,9 +587,6 @@ io.on('connection', (socket) => {
 
         // Join Game Room
         socket.join(gameCode);
-
-        // Display Game Status
-        console.log(games[gameCode]);
     });
 
     /*
@@ -638,7 +635,6 @@ io.on('connection', (socket) => {
         }
 
         if(games[gameCode].arePlayersReady()){
-            console.log("PLAYERS ARE READY");
             switch(games[gameCode].updatePhaseOnPlayersReady()){
                 case Phase.DRAWING:
                     io.to(gameCode).emit('voters-finished-voting', {
@@ -660,7 +656,6 @@ io.on('connection', (socket) => {
                     break;
                 case Phase.FINISHED:
                     captureGameSnapshot(games[gameCode]);
-                    delete games[gameCode];
                     break;
                 case Phase.BETTING:
                 case Phase.VOTING:
@@ -668,8 +663,6 @@ io.on('connection', (socket) => {
                 
             }
         }
-
-        console.log(games[gameCode]);
 
         /*
             Update All Players
@@ -681,6 +674,13 @@ io.on('connection', (socket) => {
                 winner : games[gameCode].winner
             }
         });
+
+        /*
+            IF GAME IS FINISHED, END IT.
+        */
+        if(games[gameCode].phase == Phase.FINISHED){
+            delete games[gameCode];
+        }
     });
 
     /*
@@ -728,6 +728,7 @@ io.on('connection', (socket) => {
         */
         io.in(gameCode).emit('bet-update', {
             gameState : {
+                players : games[gameCode].getPlayersState(),
                 currentBet : games[gameCode].currentBet
             }
         });
@@ -780,6 +781,13 @@ io.on('connection', (socket) => {
                 winner : games[gameCode].winner
             }
         });
+
+        /*
+            IF GAME IS FINISHED, END IT.
+        */
+        if(games[gameCode].phase == Phase.FINISHED){
+            delete games[gameCode];
+        }
     });
 
     /*
@@ -812,9 +820,6 @@ io.on('connection', (socket) => {
         /*
             Validate User can partake in action.
         */
-        console.log(`Condition 1: ${games[gameCode].isPlayer(user.name)}`);
-        console.log(`Condition 2: ${games[gameCode].players[user.name].selection}`);
-        console.log(`Condition 3: ${games[gameCode].phase}`);
         if(!games[gameCode].isPlayer(user.name)){
             return;
         }
@@ -835,8 +840,6 @@ io.on('connection', (socket) => {
 
         if(games[gameCode].arePlayersFinished()){
             games[gameCode].revealCards();
-
-            console.log(`Winner: ${games[gameCode].winner}`);
         }
 
         /*
@@ -872,8 +875,6 @@ io.on('connection', (socket) => {
                 playersSelections : games[gameCode].getPlayersSelections()
             });
         }
-
-        console.log(games[gameCode]);
     });
 
     /*
@@ -958,6 +959,8 @@ io.on('connection', (socket) => {
         Handle User Disconnection
     */
     socket.on('disconnect', () => {
+        console.log(`${socketId} - disconnect`);
+
         if(!games || !whois[socketId] || !games[whois[socketId].gameCode]){
             return;
         }

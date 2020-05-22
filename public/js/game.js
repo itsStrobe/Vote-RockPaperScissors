@@ -103,7 +103,6 @@ function getGameByCode(gameCode){
             throw new Error(response.statusText);
         })
         .then(responseJSON => {
-            console.log(responseJSON);
             return responseJSON;
         })
         .catch(err => {
@@ -118,7 +117,6 @@ function lobbyEventListeners(socket){
     lobby.addEventListener('click', (event) => {
         event.preventDefault();
 
-        console.log(event.target);
         if(event.target.id == `${me.role}-ready-lobby`){
             socket.emit('ready', {});
         }
@@ -131,7 +129,6 @@ function bettingEventListeners(socket){
     lobby.addEventListener('click', (event) => {
         event.preventDefault();
 
-        console.log(event.target);
         if(event.target.id == `${me.role}-ready-betting`){
             socket.emit('ready', {});
         }
@@ -157,7 +154,6 @@ function selectionEventListeners(socket){
     cards.addEventListener('click', (event) => {
         event.preventDefault();
 
-        console.log(event.target);
         for(let it = 0; it < 3; it++){
             if(event.target.id === `card-${it}`){
                 if(me.role === 'Voter'){
@@ -384,7 +380,9 @@ function updateResolution(){
 
         playerElem = document.getElementById(`player${it + 1}-selection-resolution`);
         if(latestSelections[it].selection != undefined){
-            playerElem.innerHTML = IntToCard[latestSelections[it].selection];
+            playerElem.innerHTML = `
+            <img class="card-img" class="card" id="card-${it}" src="${CardImg[latestSelections[it].selection]}" alt="${IntToCard[latestSelections[it].selection]}"/>
+            `
         }
         else{
             playerElem.innerHTML = 'SELECTION';
@@ -523,6 +521,7 @@ function playGame(socket){
         /*
             Update Game State
         */
+        gameState.players = data.gameState.players;
         gameState.currentBet = data.gameState.currentBet;
 
         /*
@@ -542,12 +541,13 @@ function playGame(socket){
         gameState.winner = data.gameState.winner;
 
         /*
-            Make UI Changes
+            Make UI Changesplayer-
         */
         updateScreen();
     });
 
     socket.on('provide-hand', (data) => {
+        console.log('provide-hand');
         console.log(data);
 
         /*
@@ -586,6 +586,7 @@ function playGame(socket){
     });
 
     socket.on('players-finished-picking', (data) => {
+        console.log('player-finished-picking');
         console.log(data);
 
         /*
@@ -605,6 +606,7 @@ function playGame(socket){
     });
 
     socket.on('voter-voted', (data) => {
+        console.log('voter-voted');
         console.log(data);
 
         /*
@@ -641,6 +643,7 @@ function playGame(socket){
     });
 
     socket.on('user-left', (data) => {
+        console.log('user-left');
         console.log(data);
 
         /*

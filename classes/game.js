@@ -76,7 +76,6 @@ class Game {
     }
 
     constructor(gameCode){
-        console.log(`Creating new game 'code=${gameCode}'`);
         this.code = gameCode;
 
         this.players = new Object(); // name : { #, name, credits, hand, selection, isReady, socket }
@@ -131,13 +130,17 @@ class Game {
         }
 
         this.currentBet = Math.trunc(bet);
+
+        // Change User Status so they can accept new bet.
+        Object.keys(this.players).forEach(player => {
+            this.players[player].isReady = false;
+        });
     }
 
     makeCardSelection(name, cardIdx){
         if(this.players[name].hand == []){
             return;
         }
-        console.log(`My Hand: ${this.players[name].hand}`);
         this.players[name].selection = this.players[name].hand[cardIdx];
         this.players[name].hand.splice(cardIdx, 1);
     }
@@ -289,7 +292,6 @@ class Game {
         let playersReady = true;
         
         Object.keys(this.players).forEach(player => {
-            console.log(`Player ${player} - ${this.players[player].isReady}`)
             if(!this.players[player].isReady){
                 playersReady = false;
             }
@@ -311,7 +313,6 @@ class Game {
             }
         }
         else if(this.phase == Phase.RESOLUTION){
-            console.log(`RESOLUTION - Winner ${this.winner}`);
             // If Draw, pick again
             if(this.winner == "Draw"){
                 this.resetPlayersSelections();
@@ -352,7 +353,6 @@ class Game {
         let allSelected = true;
 
         Object.keys(this.players).forEach(player => {
-            console.log(`${player} - Selection: ${this.players[player].selection}`);
             if(this.players[player].selection == null){
                 allSelected = false;
             }
@@ -370,7 +370,6 @@ class Game {
             }
         });
     
-        console.log(`All Voted: ${allVoted}`);
         return allVoted;
     }
 
@@ -383,7 +382,6 @@ class Game {
                 this.players[player].hand.push(this.card_deck[card_it]);
                 card_it++;
             }
-            console.log(this.players[player].hand);
         });
     }
 
