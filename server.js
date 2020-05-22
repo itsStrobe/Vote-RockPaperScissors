@@ -385,6 +385,22 @@ function captureGameSnapshot(game){
         });
 }
 
+function isGameActive(gameCode){
+    Games
+        .getByCode(gameCode)
+        .then(resp => {
+            if(resp.status == Status.ONGOING){
+                return true;
+            }
+            
+            return false;
+        })
+        .catch(err => {
+            console.err(err.message);
+            return false;
+        })
+}
+
 async function getUserFromToken(token){
     return jwt.verify(token, SECRET_TOKEN, async (err, decoded) => {
         if(err){
@@ -425,6 +441,13 @@ io.on('connection', (socket) => {
         }
 
         if(!user){
+            return;
+        }
+
+        // Validate Game Exists and is Ongoing
+        if(!isGameActive(gameCode)){
+            socket.emit('game-inactive', {});
+            socket.disconnect();
             return;
         }
 
@@ -637,6 +660,7 @@ io.on('connection', (socket) => {
                     break;
                 case Phase.FINISHED:
                     captureGameSnapshot(games[gameCode]);
+                    delete games[gameCode];
                     break;
                 case Phase.BETTING:
                 case Phase.VOTING:
