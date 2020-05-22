@@ -1,7 +1,4 @@
-
-// -- CONSTANTS -- 
-
-const INITIAL_CREDITS = 120;
+const { GAME_VALUES } = require('../config');
 
 // -- ENUMS -- 
 
@@ -43,7 +40,7 @@ class Player {
         this.name = name;
         this.socket = socket;
 
-        this.credits = 120; // Default amount
+        this.credits = GAME_VALUES.INITIAL_PLAYER_CREDITS; // Default amount
         this.hand = [];
         this.selection = null;
         this.isReady = false;
@@ -64,7 +61,7 @@ class Game {
     static fillDeck(card_deck){
         let possibleCards = [Card.ROCK, Card.PAPER, Card.SCISSORS];
 
-        while(card_deck.length < 30){
+        while(card_deck.length < GAME_VALUES.MAX_VOTERS){
             card_deck.push(possibleCards[Math.floor(Math.random() * 3)]);
         }
 
@@ -186,7 +183,7 @@ class Game {
     }
 
     addVoter(name, socket){
-        if(this.numVoters < 30){
+        if(this.numVoters < GAME_VALUES.MAX_VOTERS){
             this.numVoters++;
             this.voters[name] = new Voter(name, socket);
             return true;
@@ -422,7 +419,7 @@ class Game {
         let isThereAWinner = false;
 
         Object.keys(this.players).forEach(player => {
-            if(this.players[player].credits >= INITIAL_CREDITS*2){
+            if(this.players[player].credits >= GAME_VALUES.INITIAL_PLAYER_CREDITS*2){
                 this.winner = player;
                 isThereAWinner = true;
             }
