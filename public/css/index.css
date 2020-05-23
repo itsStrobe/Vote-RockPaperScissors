@@ -1,23 +1,23 @@
 /*
     COLOR PALETTE:
 
-    https://visme.co/blog/wp-content/uploads/2016/09/website12-1024x512.jpg
-    #0B0C10
-    #1F2833
-    #C5C6C7
-    #66FCF1
-    #45A29E
+    https://visme.co/blog/wp-content/uploads/2016/09/website9-1024x512.jpg
+    #0C0032
+    #190061
+    #240090
+    #3500D3
+    #282828
 */
 
 html, body {
     font-family: "Roboto", sans-serif;
     height: 90%;
-    background-color: #0b0c10;
+    background-color: black;
 }
 
 header {
     text-align: center;
-    color: #45A29E;
+    color: white;
     padding: 5%;
 }
 
@@ -29,7 +29,7 @@ header {
     margin-left: 25%;
     padding: 2.5%;
 
-    background-color: #C5C6C7;
+    background-color: #282828;
 
     display: flex;
     flex-direction: column;
@@ -40,6 +40,8 @@ header {
 h2 {
     margin: 0;
     padding-top: 0;
+
+    color: white;
 }
 
 input {
@@ -52,6 +54,7 @@ input {
     padding: 1%;
     flex-grow: 1;
     flex-shrink: 2;
+    color: white;
 
     display: flex;
     flex-direction: row;
@@ -71,7 +74,7 @@ input {
 }
 
 button{
-    background-color: #45A29E;
+    background-color: #240090;
     border: none;
     border-radius: 10px;
     color: white;
@@ -81,7 +84,8 @@ button{
 }
 
 button:hover{
-    color:#C5C6C7;
+    background-color: #0C0032;
+    color:#240090;
 }
 
 /* PC SECTION */
