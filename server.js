@@ -163,7 +163,7 @@ app.post('/vote-rps/api/user/signup', jsonParser, (req, res) => {
                     return res.status(201).json(createdUser);
                 })
                 .catch( err => {
-                    res.statusMessage = `Something went wrong when creating new User. DB Message: ${err}`;
+                    res.statusMessage = `Username '${userName}' is already taken.`;
                     return res.status(400).end();
                 });
         })

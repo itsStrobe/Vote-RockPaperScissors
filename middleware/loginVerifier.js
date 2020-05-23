@@ -19,10 +19,9 @@ function validateSessionToken( req, res, next ){
         req.user = {
             name : decoded.name
         }
-    })
 
-    next();
-
+        next();
+    });
 }
 
 module.exports = validateSessionToken;

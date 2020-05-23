@@ -4,6 +4,30 @@ function displayServerResponse(message){
     response.innerHTML = `<div class="serverResponse"> ${message} </div>`;
 }
 
+function validateSession() {
+    let url = '/vote-rps/api/validate-session';
+    let settings = {
+        method : 'GET', 
+        headers : {
+            sessiontoken : localStorage.getItem('token')
+        }
+    };
+
+    fetch(url, settings)
+        .then(response => {
+            if(response.ok) {
+                return response.json();
+            }
+            
+            throw new Error(response.statusText);
+        })
+        .then(responseJSON => {
+            window.location.href = "/pages/home.html";
+        })
+        .catch(err => {
+        });   
+}
+
 function userLoginFetch( userName, password ){
     let url = '/vote-rps/api/user/login';
 
@@ -96,6 +120,7 @@ function watchLoginForm(){
 }
 
 function init(){
+    validateSession();
     watchLoginForm();
 }
 
