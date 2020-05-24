@@ -173,6 +173,140 @@ app.post('/vote-rps/api/user/signup', jsonParser, (req, res) => {
         });
 });
 
+// Edit User Name
+app.patch('/vote-rps/api/user/newUserName', [jsonParser, validateSessionToken], (req, res) => {
+    console.log(req.body);
+    const { newUserName, password } = req.body;
+
+    Users
+        .getByName(req.user.name)
+        .then(user => {
+            if(!user){
+                res.statusMessage = `User with 'name=${req.user.name}' was not found.`;
+                return res.status(404).end();
+            }
+
+            bcrypt.compare(password, user.password)
+                .then(result => {
+                    if(result){
+                        Users
+                            .updateUser(user.name, {
+                                name : newUserName
+                            })
+                            .then(resp => {
+                                const userData = {
+                                    name : resp.name
+                                };
+                                jwt.sign(userData, SECRET_TOKEN, {expiresIn : '30m'}, (err, token) => {
+                                    if(err){
+                                        res.statusMessage = err.message;
+                                        return res.status( 400 ).end();
+                                    }
+
+                                    // Send 201 Status with new session token.
+                                    return res.status(201).json({
+                                        token
+                                    });
+                                });
+                            })
+                            .catch(err => {
+                                res.statusMessage = `Username '${newUserName}' is already taken.`;
+                                return res.status(400).end();
+                            })
+                    }
+                    else{
+                        res.statusMessage = "Wrong credentials provided";
+                        return res.status(409).end();
+                    }
+                })
+                .catch( err => {
+                    res.statusMessage = err.message;
+                    return res.status( 400 ).end();
+                });
+        })
+        .catch( err => {
+            res.statusMessage = err.message;
+            return res.status( 400 ).end();
+        });
+});
+
+// Edit User Password
+app.patch('/vote-rps/api/user/newPassword', [jsonParser, validateSessionToken], (req, res) => {
+    const { newPassword, newPasswordConfirmation, password } = req.body;
+
+    if(!newPassword || !newPasswordConfirmation || !password){
+        res.statusMessage = "Please provide ALL required fields - [newPassword, newPasswordConfirmation, password]";
+        return res.status(400).end();
+    }
+
+    if(newPassword != newPasswordConfirmation) {
+        res.statusMessage = "Passwords do not Match";
+        return res.status(400).end();
+    }
+
+    Users
+        .getByName(req.user.name)
+        .then(user => {
+            if(!user){
+                res.statusMessage = `User with 'name=${req.user.name}' was not found.`;
+                return res.status(404).end();
+            }
+            bcrypt
+                .compare(password, user.password)
+                .then(result => {
+                    if(result){
+                        bcrypt.hash(newPassword, 10)
+                            .then(hashedPass => {
+                                Users
+                                    .updateUser(user.name, {
+                                        password : hashedPass
+                                    })
+                                    .then(resp => {
+                                        const userData = {
+                                            name : resp.name
+                                        };
+                                        jwt.sign(userData, SECRET_TOKEN, {expiresIn : '30m'}, (err, token) => {
+                                            if(err){
+                                                res.statusMessage = err;
+                                                return res.status(400).end();
+                                            }
+
+                                            // Send 201 Status with new session token.
+                                            return res.status(201).json({
+                                                token
+                                            });
+                                        });
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        res.statusMessage = `Could not update User 'name=${user.name}' password.`;
+                                        return res.status(400).end();
+                                    })
+                            })
+                            .catch( err => {
+                                console.error(err);
+                                res.statusMessage = `Something went wrong when hashing User 'name=${user.name}' new password.`;
+                                return res.status(400).end();
+                            });
+                    }
+                    else{
+                        res.statusMessage = "Wrong credentials provided";
+                        return res.status(409).end();
+                    }
+                })
+                .catch( err => {
+                    console.error(err);
+                    res.statusMessage = err.message;
+                    return res.status( 400 ).end();
+                });
+        })
+        .catch( err => {
+            console.error(err);
+            res.statusMessage = err.message;
+            return res.status( 400 ).end();
+        });
+});
+
 app.delete('/vote-rps/api/user/:name', validateSessionToken, (req, res) => {
     const userToDelete = req.params.name;
     const user = req.user;
@@ -191,7 +325,7 @@ app.delete('/vote-rps/api/user/:name', validateSessionToken, (req, res) => {
             res.message = err.message;
             return res.status(400).end();
         });
-})
+});
 
 // GAMES CRUD
 
@@ -231,7 +365,7 @@ app.get('/vote-rps/api/games/active', validateSessionToken, (req, res) => {
             res.statusMessage = `Something went wrong when fetching active games. Err=${err.message}`;
             return res.status(400).end();
         })
-})
+});
 
 // Get Game By Code
 app.get('/vote-rps/api/game/:gameCode', validateSessionToken, (req, res) => {
@@ -246,7 +380,120 @@ app.get('/vote-rps/api/game/:gameCode', validateSessionToken, (req, res) => {
             res.statusMessage = `Something went wrong when fetching Game 'code=${gameCode}'.`;
             return res.status(400).end();
         })
-})
+});
+
+// Get Games By Any Param
+app.get('/vote-rps/api/games', validateSessionToken, (req, res) => {
+    console.log(req.query);
+    const { owner, player, winner, voter, code } = req.query;
+
+    if(owner){
+        // Get User
+        Users
+        .getByName(owner)
+        .then(user => {
+            // Get Games Owned By User
+            Games
+                .getOwnedBy(user)
+                .then(resp => {
+                    return res.status(200).json(resp);
+                })
+                .catch(err => {
+                    console.error(err);
+                    res.statusMessage = `Something went wrong when fetching games owned by '${owner}'. Please try again later.`;
+                    return res.status(400).end();
+                });
+        })
+        .catch(err => {
+            res.statusMessage = `Something went wrong when fetching User 'name=${owner}'.`;
+            return res.status(400).end();
+        });
+    }
+    else if(player){
+        // Get User
+        Users
+        .getByName(player)
+        .then(user => {
+            // Get Games Played By User
+            Games
+                .getByPlayer(user)
+                .then(resp => {
+                    return res.status(200).json(resp);
+                })
+                .catch(err => {
+                    console.error(err);
+                    res.statusMessage = `Something went wrong when fetching games with Player '${player}'. Please try again later.`;
+                    return res.status(200).json(resp);
+                });
+        })
+        .catch(err => {
+            res.statusMessage = `Something went wrong when fetching User 'name=${player}'.`;
+            return res.status(400).end();
+        });
+    }
+    else if(winner){
+        // Get User
+        Users
+            .getByName(winner)
+            .then(user => {
+                // Get Games Winned By User
+                console.log("getByName not failing");
+                console.log(user);
+                Games
+                    .getByWinner(user)
+                    .then(resp => {
+                        return res.status(200).json(resp);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        res.statusMessage = `Something went wrong when fetching games with Winner '${winner}'. Please try again later.`;
+                        return res.status(200).json(resp);
+                    });
+            })
+            .catch(err => {
+                res.statusMessage = `Something went wrong when fetching User 'name=${winner}'.`;
+                return res.status(400).end();
+            });
+    }
+    else if(voter){
+        // Get User
+        Users
+            .getByName(voter)
+            .then(user => {
+                // Get Games Voted By User
+                Games
+                    .getByVoter(user)
+                    .then(resp => {
+                        return res.status(200).json(resp);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        res.statusMessage = `Something went wrong when fetching games with Voter '${voter}'. Please try again later.`;
+                        return res.status(200).json(resp);
+                    });
+            })
+            .catch(err => {
+                res.statusMessage = `Something went wrong when fetching User 'name=${voter}'.`;
+                return res.status(400).end();
+            });
+    }
+    else if(code){
+        Games
+            .getByCode(code)
+            .then(resp => {
+                return res.status(200).json(resp);
+            })
+            .catch(err => {
+                console.error(err);
+                res.statusMessage = `Something went wrong when fetching game with Code '${code}'. Please try again later.`;
+                return res.status(200).json(resp);
+            });
+    }
+    else {
+        res.statusMessage = "Please Submit a Valid Query - [owner, player, winner, voter, code]."
+        return res.status(400).end();
+    }
+});
 
 // Create a New Game Owned By User
 app.post('/vote-rps/api/game/newGame', [jsonParser, validateSessionToken], (req, res) => {
@@ -300,7 +547,8 @@ const server = app.listen(PORT, '0.0.0.0', () =>{
         const settings = {
             useNewUrlParser: true, 
             useUnifiedTopology: true, 
-            useCreateIndex: true
+            useCreateIndex: true,
+            useFindAndModify: false
         };
         mongoose.connect( DATABASE_URL, settings, ( err ) => {
             if( err ){
@@ -319,7 +567,6 @@ const server = app.listen(PORT, '0.0.0.0', () =>{
 
 // === PLAY GAME ===
 
-const INITIAL_CREDITS = 120;
 let games = new Object();
 let whois = new Object();
 const io = require('socket.io')(server);

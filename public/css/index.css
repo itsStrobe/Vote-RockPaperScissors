@@ -62,7 +62,7 @@ input {
     align-items: center;
 }
 
-.form-buttons{
+.form-buttons {
     width: 80%;
     padding: 0.5%;
     flex-grow: 2;

@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <title>Vote - RPS</title>
-        <link href="./../css/history.css" rel="stylesheet" type="text/css" />
+        <link href="./../css/settings.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <header>
@@ -23,29 +23,61 @@
         </section>
 
         <main>
-            <section class="game-section" id="user-settings">
-                <h2>Public Games</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="tb_header">Game Owner</th>
-                            <th class="tb_header">Voters</th>
-                            <th class="tb_header">Join Now</th>
-                        </tr>
-                    </thead>
-                    <tbody class="active-games">
-                        <tr>
-                            <td class="tb_row">owner_ph</td>
-                            <td class="tb_row">voters_ph</td>
-                            <td class="tb_row">
-                                <button class="join-game" id="game-code">
-                                    Join
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <section class="game-section" id="username-settings">
+                <h2>Change Username</h2>
+                <form class="game-form" id="new-username-form">
+                    <section class="form-field">
+                        <label for="new-username">
+                            New Username:
+                        </label>
+                        <input type="text" id="new-username" required/>
+                    </section>
 
+                    <section class="form-field">
+                        <label for="userPassword-new-username">
+                            Password:
+                        </label>
+                        <input type="password" id="userPassword-new-username" required/>
+                    </section>
+
+                    <section class="form-buttons">
+                        <button type="submit" id="new-username-button">
+                            Submit
+                        </button>
+                    </section>
+                </form>
+            </section>
+
+            <section class="game-section" id="password-settings">
+                <h2>Change Password</h2>
+                <form class="game-form" id="new-password-form">
+                    <section class="form-field">
+                        <label for="new-password">
+                            New Password:
+                        </label>
+                        <input type="password" id="new-password" required/>
+                    </section>
+
+                    <section class="form-field">
+                        <label for="new-password-confirm">
+                            Confirm New Password:
+                        </label>
+                        <input type="password" id="new-password-confirmation" required/>
+                    </section>
+
+                    <section class="form-field">
+                        <label for="userPassword-new-password">
+                            Password:
+                        </label>
+                        <input type="password" id="userPassword-new-password" required/>
+                    </section>
+
+                    <section class="form-buttons">
+                        <button type="submit" id="new-password-button">
+                            Submit
+                        </button>
+                    </section>
+                </form>
             </section>
         </main>
 
@@ -57,6 +89,6 @@
             </ul>
         </footer>
 
-        <script src="./../js/home.js"></script>
+        <script src="./../js/settings.js"></script>
     </body>
 </html>

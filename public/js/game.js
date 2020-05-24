@@ -87,9 +87,7 @@ function getGameByCode(gameCode){
     let settings = {
         method : 'GET',
         headers : {
-            'Content-Type' : 'application/json'
-        },
-        headers : {
+            'Content-Type' : 'application/json',
             sessiontoken : localStorage.getItem('token')
         }
     };

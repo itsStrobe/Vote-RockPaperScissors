@@ -40,7 +40,7 @@ function displayActiveGames(games){
         gamesTable.innerHTML += `
         <tr>
             <td class="tb_row">${game.owner.name}</td>
-            <td class="tb_row">${game.players.length}/20</td>
+            <td class="tb_row">${game.voters.length}/20</td>
             <td class="tb_row">
                 <button class="join-game" id="${game.code}">
                     Join
@@ -88,9 +88,7 @@ function getActiveGames(){
     let settings = {
         method : 'GET',
         headers : {
-            'Content-Type' : 'application/json'
-        },
-        headers : {
+            'Content-Type' : 'application/json',
             sessiontoken : localStorage.getItem('token')
         }
     };

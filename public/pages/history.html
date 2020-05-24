@@ -24,27 +24,80 @@
 
         <main>
             <section class="game-section" id="previous-matches">
-                <h2>Public Games</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="tb_header">Game Owner</th>
-                            <th class="tb_header">Voters</th>
-                            <th class="tb_header">Join Now</th>
-                        </tr>
-                    </thead>
-                    <tbody class="active-games">
-                        <tr>
-                            <td class="tb_row">owner_ph</td>
-                            <td class="tb_row">voters_ph</td>
-                            <td class="tb_row">
-                                <button class="join-game" id="game-code">
-                                    Join
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h2>Match History</h2>
+                <form class="game-form">
+                    <section class="form-field">
+                        <label for="searchBy">
+                            Search By:
+                        </label>
+                        <select id="searchBy" name="searchBy">
+                            <option value="owner">Owner</option>
+                            <option value="player">Player</option>
+                            <option value="voter">Voter</option>
+                            <option value="winner">Winner</option>
+                            <option value="code">Game Code</option>
+                        </select>
+                    </section>
+
+                    <section class="form-field" id="searchBy-field">
+                        <input type="text" id="searchBy-value" />
+                    </section>
+
+                    <section class="form-buttons">
+                        <button type="submit" id="search-button">
+                            Search
+                        </button>
+                    </section>
+                </form>
+                <div class="table-container">
+                    <table id="match-history">
+                        <!--
+                            code : {
+                                type : String
+                            },
+                            owner : {
+                                ref : 'User'
+                            },
+                            players : [{
+                                ref : 'User'
+                            }],
+                            voters : [{
+                                ref : 'User'
+                            }],
+                            winner : {
+                                ref : 'User'
+                            },
+                            status : {
+                                type : Number,
+                            },
+                            date : {
+                                type : Date
+                            }
+                        -->
+                        <thead>
+                            <tr>
+                                <th class="tb_header">Code</th>
+                                <th class="tb_header">Owner</th>
+                                <th class="tb_header">Players</th>
+                                <th class="tb_header">Winner</th>
+                                <th class="tb_header">Voters</th>
+                                <th class="tb_header">Status</th>
+                                <th class="tb_header">Date Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="found-matches">
+                            <tr>
+                                <td class="tb_row">code_ph</td>
+                                <td class="tb_row">owner_ph</td>
+                                <td class="tb_row">players_ph</td>
+                                <td class="tb_row">winner_ph</td>
+                                <td class="tb_row">voters_ph</td>
+                                <td class="tb_row">status_ph</td>
+                                <td class="tb_row">date_ph</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
             </section>
         </main>
@@ -57,6 +110,6 @@
             </ul>
         </footer>
 
-        <script src="./../js/home.js"></script>
+        <script src="./../js/history.js"></script>
     </body>
 </html>

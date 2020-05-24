@@ -18,6 +18,10 @@ body {
     margin: 0;
     margin-left: 10%;
     padding: 0;
+
+    background-color: black;
+
+    color: white;
 }
 
 header {
@@ -42,6 +46,9 @@ header {
     background-color: #111; /* Black */
     overflow-x: hidden; /* Disable horizontal scroll */
     padding-top: 20px;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .sidenav a {
@@ -61,26 +68,54 @@ header {
 */
 
 .response {
+    padding-top: 10px;
     text-align: center;
 }
 
 main {
     display: flex;
-
+    flex-direction: column;
     justify-content: center;
-    margin-bottom: 20px;
+    align-content: center;
+    align-items: center;
+
+    overflow: scroll;
 }
 
 .game-section {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
 
+    margin-top: 5%;
     margin-bottom: 1px;
     border-style: solid;
     border-width: 1px;
     border-radius: 10px;
+
+    background-color: #282828;
+}
+
+.game-section-content {
+    padding: 1%;
+}
+
+button{
+    background-color: #3500D3;
+    border-radius: 10px;
+    border: none;
+    color: white;
+
+    flex-grow: 1;
+    width: 50%;
+
+    font-size: 100%;
+}
+
+button:hover{
+    background-color: #0C0032;
+    color:#240090;
 }
 
 footer {
@@ -91,6 +126,7 @@ footer {
     color: white;
     background-color: #282828;
     padding: 1%;
+    height: 12.5%;
 
     position: fixed;
     left: 0;
@@ -112,17 +148,50 @@ footer {
 
 
 /* PC SECTION */
-@media (min-width : 991px) {
-    .active-games {
-        width: 30%;
-    }
-  
+@media (min-width : 991px) {  
     main {
-        justify-content: space-evenly;
+        justify-content: center;
         padding-top: 10px;
+        margin-bottom: 10%;
     }
 
     .game-section {
         width: 40%;
+    }
+}
+
+
+/* MOBILE SECTION */
+@media screen and (max-width: 700px) {
+    body{
+        margin-left: 0;
+    }
+
+    .sidenav {
+        height: 10%; /* Full-height: remove this if you want "auto" height */
+        width: 100%; /* Set the width of the sidebar */
+        position: relative; /* Fixed Sidebar (stay in place on scroll) */
+        z-index: 1; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: #111; /* Black */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 5px;
+        padding-bottom: 5px;
+
+        text-align: center;
+
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+    main {
+        margin-bottom: 30%;
+    }
+
+    footer {
+        margin-left: 0;
+        width: 100%;
     }
 }

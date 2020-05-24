@@ -62,6 +62,11 @@ const Games = {
     getAll : function(){
         return gamesCollection
                 .find()
+                .populate('owner', 'name')
+                .populate('voter', 'name')
+                .populate('players', 'name')
+                .populate('voters', 'name')
+                .populate('winner', 'name')
                 .then( allGames => {
                     return allGames;
                 })
@@ -73,6 +78,11 @@ const Games = {
     getByCode : function(code){
         return gamesCollection
                 .findOne({code : code})
+                .populate('owner', 'name')
+                .populate('voter', 'name')
+                .populate('players', 'name')
+                .populate('voters', 'name')
+                .populate('winner', 'name')
                 .then(res => {
                     return res;
                 })
@@ -135,6 +145,9 @@ const Games = {
                 })
                 .populate('owner', 'name')
                 .populate('voter', 'name')
+                .populate('players', 'name')
+                .populate('voters', 'name')
+                .populate('winner', 'name')
                 .then( userGames => {
                     return userGames;
                 })
@@ -150,6 +163,9 @@ const Games = {
                 })
                 .populate('owner', 'name')
                 .populate('voter', 'name')
+                .populate('players', 'name')
+                .populate('voters', 'name')
+                .populate('winner', 'name')
                 .then( userGames => {
                     return userGames;
                 })
@@ -160,11 +176,14 @@ const Games = {
     },
     getByWinner : function(winner){
         return gamesCollection
-                .findOne({
-                    winner : player
+                .find({
+                    winner : winner
                 })
                 .populate('owner', 'name')
                 .populate('voter', 'name')
+                .populate('players', 'name')
+                .populate('voters', 'name')
+                .populate('winner', 'name')
                 .then( userGames => {
                     return userGames;
                 })

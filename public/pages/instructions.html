@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <title>Vote - RPS</title>
-        <link href="./../css/history.css" rel="stylesheet" type="text/css" />
+        <link href="./../css/instructions.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <header>
@@ -23,29 +23,103 @@
         </section>
 
         <main>
-            <section class="game-section" id="instructions">
-                <h2>Public Games</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="tb_header">Game Owner</th>
-                            <th class="tb_header">Voters</th>
-                            <th class="tb_header">Join Now</th>
-                        </tr>
-                    </thead>
-                    <tbody class="active-games">
-                        <tr>
-                            <td class="tb_row">owner_ph</td>
-                            <td class="tb_row">voters_ph</td>
-                            <td class="tb_row">
-                                <button class="join-game" id="game-code">
-                                    Join
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <section class="game-section" id="general-description">
+                <h2>GAME RULES</h2>
 
+                <p class="game-section-content">
+                    <br>
+                        This game is based on the anime series Kakgurui (賭ケグルイ), and follows the same fundamental rules as described in the first episode.
+                    </br>
+                    <br>
+                        Simply put, it is the game Rock-Paper-Scissors with a twist, in which the <b>Players</b> may only chose a among 3 cards that they pick from a pile filled by <b>Voters</b>.
+                    </br>
+                    <br>
+                        It consists of 5 main phases:
+                    </br>
+                    <ol>
+                        <li>
+                            <a href="#lobby-description">Lobby Phase</a>
+                        </li>
+                        <li>
+                            <a href="#betting-description">Betting Phase</a>
+                        </li>
+                        <li>
+                            <a href="#voting-description">Voting Phase</a>
+                        </li>
+                        <li>
+                            <a href="#drawing-description">Lobby Phase</a>
+                        </li>
+                        <li>
+                            <a href="#resolution-description">Lobby Phase</a>
+                        </li>
+                    </ol>
+                </p>
+            </section>
+            <section class="game-section" id="lobby-description">
+                <h2>LOBBY PHASE</h2>
+                <p class="game-section-content">
+                    <br>
+                        This is a waiting screen to allow <b>Players</b> and <b>Voters</b> to join.
+                    </br>
+                    <br>
+                        Roles are defined in a FIFO fashion, in which the first two Users to join are <b>Players</b> and the rest are <b>Voters</b>, up to a cap of 20.
+                    </br>
+                    <br>
+                        In order to advance to the next stage, both <b>Players</b> must simultaneously click the <b>Ready</b> button.
+                    </br>
+                </p>
+            </section>
+            <section class="game-section" id="betting-description">
+                <h2>BETTING PHASE</h2>
+                <p class="game-section-content">
+                    <br>
+                        In this Phase, both <b>Players</b> must agree on an amount to bet in that round.
+                    </br>
+                    <br>
+                        Any <b>Player</b> may <b>Propose</b> a betting amount that does not exceed his current <b>Credits</b>.
+                    </br>
+                </p>
+            </section>
+            <section class="game-section" id="voting-description">
+                <h2>VOTING PHASE</h2>
+                <p class="game-section-content">
+                    <br>
+                        This phase allows <b>Voters</b> to select which <b>Card</b> to place in the ballot.
+                    </br>
+                    <br>
+                        The game does not advance to the next stage until <b>ALL VOTERS</b> cast their vote. If there are less than 20 voters, the Game randomly autofils the remaining cards.
+                    </br>
+                </p>
+            </section>
+            <section class="game-section" id="drawing-description">
+                <h2>DRAWING PHASE</h2>
+                <p class="game-section-content">
+                    <br>
+                        In this phase <b>Players</b> receive three random <b>Cards</b> from the ballot filled by the <b>Voters</b>.
+                    </br>
+                    <br>
+                        They may play any of their cards in order to win the round.
+                    </br>
+                </p>
+            </section>
+            <section class="game-section" id="resolution-description">
+                <h2>RESOLUTION PHASE</h2>
+                <p class="game-section-content">
+                    <br>
+                        In this phase, both <b>Players</b> reveal their <b>Cards</b> to decide a Winner.
+                    </br>
+                    <br>
+                        The <b>Winner</b> takes the full amount of <b>Credits</b> bet for that round. After this, both players return the <b>BETTING</b> phase.
+                        If a <b>Players</b> runs of out <b>Credits</b> in this phase, this results on the game ending, declaring the other player as the <b>Match Winner</b>.
+                    </br>
+                    <br>
+                        In case of a <b>DRAW</b>, the game returns to the <b>DRAWING</b> phase removing the played card.
+                        If <b>Players</b> run out of cards, the round finishes on a draw and the game goes to the <b>BETTING</b> phase.
+                    </br>
+                    <br>
+                        Any <b>Player</b> may Forefeit in this round by clicking the <b>RETIRE</b> button, declaring the other player as the <b>Match Winner</b>.
+                    </br>
+                </p>
             </section>
         </main>
 
@@ -57,6 +131,6 @@
             </ul>
         </footer>
 
-        <script src="./../js/home.js"></script>
+        <script src="./../js/instructions.js"></script>
     </body>
 </html>
