@@ -16,18 +16,31 @@
 html, body {
     font-family: "Roboto", sans-serif;
     margin: 0;
-    height: 100%;
+    height: 90%;
     padding: 0;
+
+    background-color: black;
+    color: white;
+}
+
+header {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: fit-content;
+
+    text-align: center;
 }
 
 main {
     height: 80%;
-    position: relative;
     display: flex;
 
     justify-content: center;
     margin-bottom: 20px;
 }
+
+/* START ALL ELEMENTS HIDDEN */
 
 /* GAME SECTION FLAVOR */
 
@@ -40,7 +53,6 @@ main {
     width: 100%;
     height: 100%;
     margin-bottom: 100px;
-    border-style: solid;
     border-width: 1px;
     border-radius: 10px;
 }
@@ -53,14 +65,16 @@ main {
     border-width: 1px;
     border-radius: 10px;
     margin: 1%;
+
+    background-color: #282828;
 }
 
 .game-section-head {
     flex-direction: column;
     align-items: center;
 
-    width: max-content;
-    height: max-content;
+    text-align: center;
+    width: 30%;
 }
 
 .game-section-players {
@@ -68,14 +82,16 @@ main {
     justify-content: space-around;
 
     width: 90%;
-    height: 50%;
+    height: 70%;
 }
 
 .game-section-players > section {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    flex-grow: 1;
 
+    width: 30%;
     text-align: center;
 }
 
@@ -111,8 +127,25 @@ main {
     height: 20%;
 }
 
+.button-section {
+    display: flex;
+
+    flex-grow: 2;
+    flex-direction: column;
+}
+
+button{
+    background-color: #3500D3;
+    border-radius: 10px;
+    border: none;
+    color: white;
+
+    font-size: 100%;
+    height: 50%;
+}
+
 /* PC SECTION */
-@media (min-width : 991px) {
+@media (min-width : 701px) {
     header {
         flex-direction: row;
         justify-content: space-evenly;
@@ -122,5 +155,46 @@ main {
     main {
         justify-content: space-evenly;
         padding-top: 10px;
+    }
+}
+
+
+/* MOBILE SECTION */
+@media screen and (max-width: 700px) {
+    body{
+        margin-left: 0;
+    }
+
+    main {
+        height: fit-content;
+    }
+
+    .game-section > div {
+        width: 90%;
+    }
+
+    .game-section-players {
+        height: fit-content;
+
+        flex-direction: column;
+        align-content: center;
+        align-items: center;
+    }
+
+    .game-section-players > section {
+        margin: 1%;
+        width: 90%;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 10px;
+    }
+
+    .button-section {
+        flex-grow: 2;
+        flex-direction: row;
+    }
+
+    button {
+        flex-grow: 2;
     }
 }

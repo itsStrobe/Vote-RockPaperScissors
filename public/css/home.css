@@ -169,7 +169,7 @@ footer {
 
 
 /* PC SECTION */
-@media (min-width : 991px) {
+@media (min-width : 701px) {
     .active-games {
         width: 30%;
     }
