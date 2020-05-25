@@ -40,7 +40,7 @@ class Player {
         this.name = name;
         this.socket = socket;
 
-        this.credits = GAME_VALUES.INITIAL_PLAYER_CREDITS; // Default amount
+        this.credits = Number(GAME_VALUES.INITIAL_PLAYER_CREDITS); // Default amount
         this.hand = [];
         this.selection = null;
         this.isReady = false;
@@ -118,6 +118,11 @@ class Game {
             return;
         }
 
+        // Type Safety
+        bet = Number(bet);
+        if(bet == NaN){
+            return;
+        }
 
         if(this.players[name].credits < bet){
             bet = this.players[name].credits;

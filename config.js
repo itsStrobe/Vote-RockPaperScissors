@@ -8,7 +8,7 @@ module.exports = {
 
     // GAME VARIABLES
     GAME_VALUES : {
-        INITIAL_PLAYER_CREDITS : process.env.GAME_INITIAL_PLAYER_CREDITS || 120,
-        MAX_VOTERS : process.env.GAME_MAX_VOTERS || 20
+        INITIAL_PLAYER_CREDITS : Number(process.env.GAME_INITIAL_PLAYER_CREDITS) || 120,
+        MAX_VOTERS : Number(process.env.GAME_MAX_VOTERS) || 20
     }
 }
