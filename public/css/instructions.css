@@ -148,7 +148,7 @@ footer {
 
 
 /* PC SECTION */
-@media (min-width : 701) {  
+@media (min-width : 701px) {  
     main {
         justify-content: center;
         padding-top: 10px;
