@@ -81,7 +81,7 @@ function validateSession() {
         });   
 }
 
-function getGameByCode(gameCode){
+async function getGameByCode(gameCode){
     let url = `/vote-rps/api/game/${gameCode}`;
 
     let settings = {
@@ -92,20 +92,20 @@ function getGameByCode(gameCode){
         }
     };
 
-    fetch( url, settings )
+    return fetch( url, settings )
         .then(response => {
             if(response.ok){
                 return response.json();
             }
-            
+
             throw new Error(response.statusText);
         })
         .then(responseJSON => {
             return responseJSON;
         })
         .catch(err => {
-            console.log(err);
-            throw new Error(err.message);
+            alert(`Game with 'code=${gameCode}' does not exist.`);
+            window.location.href = "/pages/home.html";
         });
 }
 
@@ -175,7 +175,6 @@ function resolutionEventListeners(socket){
     lobby.addEventListener('click', (event) => {
         event.preventDefault();
 
-        console.log(event.target);
         if(event.target.id == `${me.role}-ready-resolution`){
             socket.emit('ready', {});
         }
@@ -187,8 +186,6 @@ function changeActiveScreen(whichScreen){
     for(let it = 0; it < screens.length; it++){
         screens[it].style.display = "none";
     }
-
-    console.log(screens);
 
     switch(whichScreen){
         case GameScreen.LOBBY:
@@ -331,14 +328,20 @@ function updateStandBy(){
     if(gameState.phase === Phase.VOTING){
         gameState.voters.forEach(voter => {
             if(!voter.voted){
-                waitingFor.innerHTML += `${voter.name} - `;
+                waitingFor.innerHTML += `
+                <div class="user-list-waitingFor">
+                    ${voter.name}
+                </div>`;
             }
         });
     }
     else if(gameState.phase === Phase.DRAWING){
         gameState.players.forEach(player => {
             if(player.selection == null){
-                waitingFor.innerHTML += `${player.name}`;
+                waitingFor.innerHTML += `
+                <div class="user-list-waitingFor">
+                    ${player.name}
+                </div>`;
             }
         });
     }
@@ -407,9 +410,6 @@ function updateWinner(){
 }
 
 function updateScreen(){
-    console.log("Update Screen");
-    console.log(me);
-    console.log(gameState);
 
     // LOBBY PHASE
     if(gameState.phase === Phase.LOBBY){
@@ -488,6 +488,7 @@ function updateScreen(){
 
 function playGame(socket){
     socket.on('welcome', (data) => {
+        console.log('welcome');
         console.log(data);
 
         me = data.player;
@@ -514,6 +515,7 @@ function playGame(socket){
     });
 
     socket.on('bet-update', (data) => {
+        console.log('bet-update');
         console.log(data);
 
         /*
@@ -529,6 +531,7 @@ function playGame(socket){
     });
 
     socket.on('player-ready', (data) => {
+        console.log('player-ready');
         console.log(data);
 
         /*
@@ -662,23 +665,40 @@ function playGame(socket){
 }
 
 function init(){
+    changeActiveScreen(null);
     validateSession();
     const params = new URLSearchParams(document.location.search);
     const gameCode = params.get("gameCode");
     updateGameCode(gameCode);
-    let game = getGameByCode(gameCode);
 
-    const socket = io('/');
-    playGame(socket);
-    lobbyEventListeners(socket);
-    bettingEventListeners(socket);
-    selectionEventListeners(socket);
-    resolutionEventListeners(socket);
+    getGameByCode(gameCode)
+        .then(game => {
+            if(!game){
+                // GAME NOT FOUND
+                throw new Error(`Game 'code=${game.code}' not found.\n Returning Home.`);
+            }
 
-    socket.emit('join-game', {
-        gameCode: gameCode,
-        sessiontoken: localStorage.getItem('token')
-    });
+            if(game.status == 1){
+                // GAME IS FINISHED
+                throw new Error(`Game 'code=${game.code}' is aleady finished.\n Returning Home.`);
+            }
+
+            const socket = io('/');
+            playGame(socket);
+            lobbyEventListeners(socket);
+            bettingEventListeners(socket);
+            selectionEventListeners(socket);
+            resolutionEventListeners(socket);
+        
+            socket.emit('join-game', {
+                gameCode: game.code,
+                sessiontoken: localStorage.getItem('token')
+            });
+        })
+        .catch(err => {
+            alert(err.message);
+            window.location.href = "/pages/home.html";
+        });
 }
 
 init();

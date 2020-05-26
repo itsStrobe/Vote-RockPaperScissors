@@ -359,7 +359,26 @@ app.get('/vote-rps/api/games/active', validateSessionToken, (req, res) => {
     Games
         .getActive()
         .then(result => {
-            return res.status(200).json(result);
+            let activeGames = [];
+
+            result.forEach(game => {
+                let currentVoters = [];
+                if(games[game.code]){
+                    currentVoters = games[game.code].getVotersState();
+                }
+
+                activeGames.push({
+                    _id : game._id,
+                    code : game.code,
+                    players : game.players,
+                    voters : game.voters,
+                    status : game.status,
+                    owner : game.owner,
+                    currentVoters
+                });
+            });
+
+            return res.status(200).json(activeGames);
         })
         .catch(err => {
             res.statusMessage = `Something went wrong when fetching active games. Err=${err.message}`;
@@ -788,7 +807,7 @@ io.on('connection', (socket) => {
             socket.to(gameCode).emit('user-joined', {
                 user : {
                     name : user.name,
-                    role : `player${games[gameCode].players[user.name].number}`
+                    role :  'Voter'
                 },
                 gameState : {
                     players : games[gameCode].getPlayersState(),

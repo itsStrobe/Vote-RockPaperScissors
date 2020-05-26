@@ -33,11 +33,10 @@ header {
 }
 
 main {
-    height: 80%;
+    height: fit-content;
     display: flex;
 
     justify-content: center;
-    margin-bottom: 20px;
 }
 
 /* START ALL ELEMENTS HIDDEN */
@@ -51,10 +50,21 @@ main {
     align-items: center;
 
     width: 100%;
-    height: 100%;
-    margin-bottom: 100px;
+    min-height: 500px;
+    height: fit-content;
     border-width: 1px;
     border-radius: 10px;
+}
+
+h3, h4 {
+    margin: 10px
+}
+
+.game-section-players-name {
+    font-size: xx-large;
+}
+.game-section-players-credits {
+    font-size: x-large;
 }
 
 .game-section > div {
@@ -81,8 +91,9 @@ main {
     flex-direction: row;
     justify-content: space-around;
 
+    min-height: 300px;
+    height: fit-content;
     width: 90%;
-    height: 70%;
 }
 
 .game-section-players > section {
@@ -101,11 +112,9 @@ main {
     justify-content: space-around;
 
     width: 80%;
-    height: 80%;
 }
 
 .card-img {
-    flex-grow: 1;
     width: 30%;
 
     margin-bottom: 1px;
@@ -118,13 +127,32 @@ main {
     object-fit: contain;
 }
 
-.game-section-voters {
+.game-section-voters, .game-section-waitingFor {
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
 
     width: 90%;
-    height: 20%;
+    height: fit-content;
+}
+
+.game-section-voters-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+
+    width: 100%;
+    height: fit-content;
+}
+
+.voters-list-voter, .user-list-waitingFor {
+    text-align: center;
+    padding: 1%;
+}
+
+#player-bet, #make-bet-button {
+    width: 50%;
 }
 
 .button-section {
@@ -169,6 +197,10 @@ button{
         height: fit-content;
     }
 
+    .game-section {
+        margin-bottom: 10px;
+    }
+
     .game-section > div {
         width: 90%;
     }
@@ -196,5 +228,6 @@ button{
 
     button {
         flex-grow: 2;
+        height: 100%;
     }
 }

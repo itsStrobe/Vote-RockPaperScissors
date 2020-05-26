@@ -37,10 +37,19 @@ function displayActiveGames(games){
     gamesTable.innerHTML = "";
 
     games.forEach(game => {
+        let numVoters = 0;
+
+        if(game.currentVoters){
+            numVoters = game.currentVoters.length;
+        }
+        else{
+            numVoters = game.voters.length;
+        }
+
         gamesTable.innerHTML += `
         <tr>
             <td class="tb_row">${game.owner.name}</td>
-            <td class="tb_row">${game.voters.length}/20</td>
+            <td class="tb_row">${numVoters}/20</td>
             <td class="tb_row">
                 <button class="join-game" id="${game.code}">
                     Join
