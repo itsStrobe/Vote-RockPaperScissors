@@ -78,8 +78,6 @@ main {
     justify-content: center;
     align-content: center;
     align-items: center;
-
-    overflow: scroll;
 }
 
 .game-section {
@@ -121,12 +119,13 @@ button:hover{
 footer {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
 
     color: white;
     background-color: #282828;
     padding: 1%;
-    height: 12.5%;
+    height: 100px;
 
     position: fixed;
     left: 0;
@@ -143,7 +142,7 @@ footer {
 
     margin: 0;
     padding: 0;
-    width: 100%;
+    width: 50%;
 }
 
 
