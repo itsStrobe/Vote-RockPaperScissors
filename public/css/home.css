@@ -78,7 +78,7 @@ main {
     flex-direction: row;
     justify-content: center;
 
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 .game-section {
@@ -99,7 +99,7 @@ main {
 .table-container {
     width: 80%;
     max-height: 80%;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 .table-container > table {
