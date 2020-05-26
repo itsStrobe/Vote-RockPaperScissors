@@ -176,6 +176,7 @@ footer {
     main {
         justify-content: space-evenly;
         padding-top: 10px;
+        margin-bottom: 150px;
     }
 
     .game-section {
