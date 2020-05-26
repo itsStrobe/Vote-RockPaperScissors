@@ -210,6 +210,11 @@ footer {
         align-items: center;
     }
 
+    .sidenav a {
+        flex-shrink: 1;
+        font-size: medium;
+    }
+
     main {
         flex-direction: column-reverse;
         margin-bottom: 30%;

@@ -220,6 +220,11 @@ footer {
         align-items: center;
     }
 
+    .sidenav a {
+        flex-shrink: 1;
+        font-size: medium;
+    }
+
     main {
         margin-bottom: 30%;
     }
