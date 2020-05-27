@@ -63,10 +63,12 @@ function patchPassword(newPassword, newPasswordConfirmation, password){
             throw new Error(response.statusText);
         })
         .then(responseJSON => {
+            alert(`Password successfully changed.`);
             localStorage.setItem('token', responseJSON.token);
             validateSession();
         })
         .catch(err => {
+            alert(err.message);
             displayServerResponse(err.message);
             throw new Error(err.message);
         });
@@ -100,10 +102,12 @@ function patchUsername(newUserName, password){
             throw new Error(response.statusText);
         })
         .then(responseJSON => {
+            alert(`Username successfully changed to ${newUserName}.`);
             localStorage.setItem('token', responseJSON.token);
             validateSession();
         })
         .catch(err => {
+            alert(err.message);
             displayServerResponse(err.message);
             throw new Error(err.message);
         });

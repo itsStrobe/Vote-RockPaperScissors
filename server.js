@@ -633,11 +633,11 @@ function captureGameSnapshot(game){
                                     status
                                 })
                                 .then(updatedGame => {
-                                    console.log(`Captured Snapshot of Game 'game=${gameCode}'`);
+                                    console.log(`Captured Snapshot of Game 'game=${game.code}'`);
                                 })
                                 .catch(err => {
-                                    console.log(`Something went wrong when Capturing Snapshot of Game 'game=${gameCode}'.`);
-                                    throw new Error(`Something went wrong when Capturing Snapshot of Game 'game=${gameCode}'.`);
+                                    console.log(`Something went wrong when Capturing Snapshot of Game 'game=${game.code}'.`);
+                                    throw new Error(`Something went wrong when Capturing Snapshot of Game 'game=${game.code}'.`);
                                 });
                         })
                         .catch(err => {

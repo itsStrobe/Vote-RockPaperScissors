@@ -54,7 +54,7 @@ header {
 .sidenav a {
     padding: 6px 8px 6px 16px;
     text-decoration: none;
-    font-size: 25px;
+    font-size: medium;
     color: #818181;
     display: block;
 }
@@ -118,6 +118,11 @@ main {
 #joinGameCode {
     flex-grow: 1;
     text-align: center;
+    width: 70%;
+}
+
+#join-game-code {
+    width: 30%;
 }
 
 button{

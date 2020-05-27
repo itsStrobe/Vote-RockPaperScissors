@@ -181,6 +181,19 @@ function resolutionEventListeners(socket){
     });
 }
 
+function winnerEventListeners(socket){
+    let lobby = document.getElementById("game-section-data-winner");
+
+    lobby.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        if(event.target.id == 'go-home-button'){
+            socket.disconnect();
+            window.location.href = "/pages/home.html";
+        }
+    });
+}
+
 function changeActiveScreen(whichScreen){
     let screens = document.getElementsByClassName('game-section');
     for(let it = 0; it < screens.length; it++){
@@ -689,6 +702,7 @@ function init(){
             bettingEventListeners(socket);
             selectionEventListeners(socket);
             resolutionEventListeners(socket);
+            winnerEventListeners(socket);
         
             socket.emit('join-game', {
                 gameCode: game.code,

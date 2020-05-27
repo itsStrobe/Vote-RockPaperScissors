@@ -151,6 +151,16 @@ h3, h4 {
     padding: 1%;
 }
 
+.game-section-data{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: space-between;
+
+    height: 50%;
+    width: 50%;
+}
+
 #player-bet, #make-bet-button {
     width: 50%;
 }
