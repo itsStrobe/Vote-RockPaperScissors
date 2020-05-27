@@ -88,6 +88,10 @@ button:hover{
     color:#240090;
 }
 
+.response {
+    color: white;
+}
+
 /* PC SECTION */
 @media (min-width : 701px) {
     .user-form {
